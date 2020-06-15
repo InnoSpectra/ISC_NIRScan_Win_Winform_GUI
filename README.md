@@ -2,11 +2,18 @@
 
 # Requirement
 
-1. C# Language Version: v7.0
+1. OS: Windows 7/10, 32/64bits system.
 
-2. Microsoft .NET Framework: v4.6.1
+2. Display resolution: 1366 * 768 and above.
 
-3. Microsoft Visual C++ Resdistributable (x86/x64): 2010 or 2017
+3. IDE: Microsoft Visual Studio 2017
+
+4. C# Language Version: v7.0
+
+5. Microsoft .NET Framework: v4.6.1
+
+6. Microsoft Visual C++ Resdistributable (x86/x64): 2010 or 2017
+
 
 # License - InnoSpectra Corp.
 
