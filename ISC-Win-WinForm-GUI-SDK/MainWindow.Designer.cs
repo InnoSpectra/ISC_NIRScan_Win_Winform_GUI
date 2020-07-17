@@ -175,7 +175,6 @@ namespace ISC_Win_WinForm_GUI
             this.tabPage_SaveScans = new System.Windows.Forms.TabPage();
             this.panel_Saved_Scan = new System.Windows.Forms.Panel();
             this.button_clear = new System.Windows.Forms.Button();
-            this.button_search = new System.Windows.Forms.Button();
             this.textBox_filter = new System.Windows.Forms.TextBox();
             this.label13 = new System.Windows.Forms.Label();
             this.dataGridView_savescan = new System.Windows.Forms.DataGridView();
@@ -2065,7 +2064,6 @@ namespace ISC_Win_WinForm_GUI
             // panel_Saved_Scan
             // 
             this.panel_Saved_Scan.Controls.Add(this.button_clear);
-            this.panel_Saved_Scan.Controls.Add(this.button_search);
             this.panel_Saved_Scan.Controls.Add(this.textBox_filter);
             this.panel_Saved_Scan.Controls.Add(this.label13);
             this.panel_Saved_Scan.Controls.Add(this.dataGridView_savescan);
@@ -2133,22 +2131,13 @@ namespace ISC_Win_WinForm_GUI
             this.button_clear.UseVisualStyleBackColor = true;
             this.button_clear.Click += new System.EventHandler(this.button_clear_Click);
             // 
-            // button_search
-            // 
-            this.button_search.Location = new System.Drawing.Point(234, 43);
-            this.button_search.Name = "button_search";
-            this.button_search.Size = new System.Drawing.Size(75, 23);
-            this.button_search.TabIndex = 4;
-            this.button_search.Text = "Apply";
-            this.button_search.UseVisualStyleBackColor = true;
-            this.button_search.Click += new System.EventHandler(this.button_search_Click);
-            // 
             // textBox_filter
             // 
-            this.textBox_filter.Location = new System.Drawing.Point(58, 44);
+            this.textBox_filter.Location = new System.Drawing.Point(49, 44);
             this.textBox_filter.Name = "textBox_filter";
-            this.textBox_filter.Size = new System.Drawing.Size(170, 22);
+            this.textBox_filter.Size = new System.Drawing.Size(260, 22);
             this.textBox_filter.TabIndex = 3;
+            this.textBox_filter.TextChanged += new System.EventHandler(this.textBox_filter_TextChanged);
             // 
             // label13
             // 
@@ -2165,13 +2154,13 @@ namespace ISC_Win_WinForm_GUI
             this.dataGridView_savescan.BackgroundColor = System.Drawing.SystemColors.Window;
             this.dataGridView_savescan.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridView_savescan.Location = new System.Drawing.Point(3, 72);
-            this.dataGridView_savescan.MultiSelect = false;
             this.dataGridView_savescan.Name = "dataGridView_savescan";
             this.dataGridView_savescan.ReadOnly = true;
             this.dataGridView_savescan.RowTemplate.Height = 24;
             this.dataGridView_savescan.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dataGridView_savescan.Size = new System.Drawing.Size(386, 278);
             this.dataGridView_savescan.TabIndex = 6;
+            this.dataGridView_savescan.KeyDown += new System.Windows.Forms.KeyEventHandler(this.dataGridView_savescan_KeyDown);
             this.dataGridView_savescan.MouseClick += new System.Windows.Forms.MouseEventHandler(this.dataGridView_savescan_MouseClick);
             // 
             // label33
@@ -4195,7 +4184,6 @@ namespace ISC_Win_WinForm_GUI
         private Button Button_ClearAllErrors;
         private Label label_ref;
         private DataGridView dataGridView_savescan;
-        private Button button_search;
         private TextBox textBox_filter;
         private Label label13;
         private Button button_clear;
