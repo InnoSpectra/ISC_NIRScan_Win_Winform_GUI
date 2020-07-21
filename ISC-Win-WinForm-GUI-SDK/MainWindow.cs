@@ -2763,7 +2763,7 @@ namespace ISC_Win_WinForm_GUI
                         int ret = Device.ReadLampRampUpData();
                         sw.WriteLine("\n***Lamp Ramp Up ADC***");
                         sw.WriteLine("ADC0,ADC1,ADC2,ADC3");
-                        for (int i = 0; i < Device.MAX_LAMP_RAMP_UP_ADC_SIZE && Device.LampRampUpADC[i * 4] != 0; i++)
+                        for (int i = 0; i < Device.MAX_LAMP_RAMP_UP_ADC_SIZE / 4 && Device.LampRampUpADC[i * 4] != 0; i++)
                         {
                             sw.WriteLine(Device.LampRampUpADC[i * 4] + "," + Device.LampRampUpADC[i * 4 + 1] + "," +
                             Device.LampRampUpADC[i * 4 + 2] + "," + Device.LampRampUpADC[i * 4 + 3]);
@@ -2772,35 +2772,12 @@ namespace ISC_Win_WinForm_GUI
                         ret = Device.ReadLampRepeatedScanData();
                         sw.WriteLine("\n***Lamp ADC among repeated times***");
                         sw.WriteLine("ADC0,ADC1,ADC2,ADC3");
-                        for (int i = 0; i < Device.MAX_LAMP_REPEATED_SCAN_ADC_SIZE && Device.LampRepeatedScanADC[i * 4] != 0; i++)
+                        for (int i = 0; i < Device.MAX_LAMP_REPEATED_SCAN_ADC_SIZE / 4 && Device.LampRepeatedScanADC[i * 4] != 0; i++)
                         {
                             sw.WriteLine(Device.LampRepeatedScanADC[i * 4] + "," + Device.LampRepeatedScanADC[i * 4 + 1] + "," +
                             Device.LampRepeatedScanADC[i * 4 + 2] + "," + Device.LampRepeatedScanADC[i * 4 + 3]);
                         }
                     }
-                    /*
-                    int dataNum;
-                    if (Scan.ScanConfigData.head.num_repeats < 30)
-                        dataNum = Scan.ScanConfigData.head.num_repeats;
-                    else
-                        dataNum = 30;
-
-                    sw.WriteLine("\n***Lamp ADC among repeated times***");
-                    sw.WriteLine("ADC0,ADC1,ADC2,ADC3");
-
-                    for (int i = 0; i < dataNum; i++)
-                    {
-                        if (MB_Ver + 1 > 'F' && MB_Ver != 'E' && MB_Ver != 'N')
-                        {
-                            sw.WriteLine(Scan.SensorData[4 + i * 4] + "," + Scan.SensorData[4 + i * 4 + 1] + "," +
-                            Scan.SensorData[4 + i * 4 + 2] + "," + Scan.SensorData[4 + i * 4 + 3]);
-                        }
-                        else
-                        {
-                            sw.WriteLine(Scan.SensorData[4 + i]);
-                        }
-                    }
-                    */
                 }
 
                 sw.Flush();  // Clear buffer
