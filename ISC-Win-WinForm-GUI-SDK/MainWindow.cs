@@ -19,15 +19,16 @@ using System.Windows.Threading;
 using System.Text.RegularExpressions;
 using System.Drawing;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace ISC_Win_WinForm_GUI
 {
     public partial class MainWindow : Form
     {
-        // For Configuration
-        private const Int32 MAX_CFG_SECTION = 5;
         private bool AppLoaded = false;
+        private String Version = "";
 
+        private const Int32 MAX_CFG_SECTION = 5;
         private List<ScanConfig.SlewScanConfig> LocalConfig = new List<ScanConfig.SlewScanConfig>();
         private List<ComboBox> ComboBox_CfgScanType = new List<ComboBox>();
         private List<ComboBox> ComboBox_CfgWidth = new List<ComboBox>();
@@ -44,8 +45,9 @@ namespace ISC_Win_WinForm_GUI
         private Int32 LocalCfg_SelIndex = -1;        // Record local selected config
         private Int32 LocalCfg_Last_SelIndex = -1;   // Rocord last local selected config
         Boolean NewConfig = false;                   // Record new config or existed config
-        Boolean EditConfig = false;
+        Boolean EditConfig = false;                  // Record config is editing or not    
         private Int32 DevCurCfg_Index = -1;          // Record current config which set to device
+        private Boolean DevCurCfg_IsTarget = false;  // Record current config is device or local
         int EditSelectIndex = -1;                    // Record edit select index   
 
         private BackgroundWorker bwDLPCUpdate;
@@ -80,7 +82,6 @@ namespace ISC_Win_WinForm_GUI
         private BackgroundWorker bwScan;
         private Boolean ScanButtonPressed = false;
 
-        private Boolean DevCurCfg_IsTarget = false; // Record current config is device or local
         private String pre_ref_time = "";
         public static String buildin_ref_time = "";
         private Boolean isCancellingConfigEdit = false;
@@ -113,12 +114,23 @@ namespace ISC_Win_WinForm_GUI
             SAVE,
             CANCEL,
         };
-        public MainWindow()
+
+        public enum ScanReference
         {
+            New,
+            Previous,
+            Built_in
+        };
+        public ScanReference userDefaultReference = ScanReference.New;
+
+        public MainWindow(string[] args)
+        {
+            MainWindowArgsParse(args);
             InitializeComponent();
-            String version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-            this.Text = string.Format("ISC WinForm SDK GUI v{0}", version.Substring(0, version.LastIndexOf('.')));
-            lb_GUI_Version.Text = string.Format("v{0}", version.Substring(0, version.LastIndexOf('.')));
+            this.Version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            this.Version = this.Version.Substring(0, this.Version.LastIndexOf('.'));
+            this.Text = string.Format("ISC WinForm SDK GUI v{0}", this.Version);
+            lb_GUI_Version.Text = string.Format("v{0}", this.Version);
 
             // Initial event delegate
             this.FormClosing += Main_FormClosing;
@@ -145,6 +157,33 @@ namespace ISC_Win_WinForm_GUI
             // Finished loading components
             AppLoaded = true;
         }
+        private void MainWindowArgsParse(string[] args)
+        {
+            foreach(string arg in args)
+            {
+                if (arg.Substring(0, 1) != "/")
+                    continue;
+                else
+                {
+                    string thisArg = arg.Substring(1, arg.Length - 1);
+                    string[] cmdParam = thisArg.Split(':');
+                    switch (cmdParam[0])
+                    {
+                        case "Ref":
+                            if(cmdParam[1] == "Previous")
+                                userDefaultReference = ScanReference.Previous;
+                            else if(cmdParam[1] == "Built-in")
+                                userDefaultReference = ScanReference.Built_in;
+                            else
+                                userDefaultReference = ScanReference.New;
+                            break;
+
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
         private void Main_FormClosing(object sender, FormClosingEventArgs e)
         {
             String HWRev = (!String.IsNullOrEmpty(Device.DevInfo.HardwareRev)) ? Device.DevInfo.HardwareRev.Substring(0, 1) : String.Empty;
@@ -167,6 +206,7 @@ namespace ISC_Win_WinForm_GUI
             bwTivaUpdate.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bwTivaUpdate_DoSacnCompleted);
             bwDLPCUpdate.ProgressChanged += new ProgressChangedEventHandler(bwDLPCUpdate_ProgressChanged);
             bwTivaUpdate.ProgressChanged += new ProgressChangedEventHandler(bwTivaUpdate_ProgressChanged);
+            ProgressBar.UserCancelRequest += new Action(() => { UserCancelScan = true; });
 
             bwScan = new BackgroundWorker
             {
@@ -203,9 +243,11 @@ namespace ISC_Win_WinForm_GUI
         {
             //init GUI item
             toolStripStatus_DeviceStatus.Image = Properties.Resources.Led_Gray;
+
             RadioButton_RefNew.Checked = true;
             ReferenceSelect = Scan.SCAN_REF_TYPE.SCAN_REF_NEW;
             Button_Scan.Text = "Reference Scan";
+
             ComboBox_PGAGain.SelectedItem = "64";
             ComboBox_PGAGain.Enabled = false;
             CheckBox_AutoGain.Checked = true;
@@ -410,23 +452,31 @@ namespace ISC_Win_WinForm_GUI
         #region connect device
         private void Device_Disconncted_Handler(bool error)
         {
-            this.Text = "ISC WinForm SDK GUI: No device connected";
-            ListBox_LocalCfgs.Items.Clear();
-            ListBox_TargetCfgs.Items.Clear();
-            toolStripStatus_DeviceStatus.Image = Properties.Resources.Led_R;
-            toolStripStatus_DeviceStatus.Text = "Device disconnected!";
-            ClearScanPlotsUI();
-            if (error)
+            BeginInvoke((Action)(() => //Invoke at UI thread
             {
-                DialogResult result = Message.ShowQuestion("Device disconnection detected !\n\nThe GUI will restart to sanitize cache.\n\nClick \"Yes\" to restart, \"No\" to close this GUI.", null, MessageBoxButtons.YesNo);
-                if (result == DialogResult.Yes)
-                    Application.Restart();
+                this.Text = string.Format("ISC WinForm SDK GUI v{0}: No device connected", this.Version);
+                ListBox_LocalCfgs.Items.Clear();
+                ListBox_TargetCfgs.Items.Clear();
+                toolStripStatus_DeviceStatus.Image = Properties.Resources.Led_R;
+                toolStripStatus_DeviceStatus.Text = "Device disconnected!";
+                ClearScanPlotsUI();
+                if (error)
+                {
+                    SDK.AutoSearch = false;
+                    SDK.IsConnectionChecking = false;
+                    DialogResult result = Message.ShowQuestion("Device disconnection detected !\n\nThe GUI will restart to sanitize cache.\n\nClick \"Yes\" to restart, \"No\" to close this GUI.", "Device Disconnected");
+                    if (result == DialogResult.Yes)
+                    {
+                        this.Close();
+                        Application.Restart();
+                    }
+                    else
+                        this.Close();
+                }
                 else
-                    this.Close();
-            }
-            else
-                DBG.WriteLine("Device disconnected successfully !");
-            UI_no_connection();
+                    DBG.WriteLine("Device disconnected successfully !");
+                UI_no_connection();
+            }), null);
         }
         private void Device_Found_Handler()
         {
@@ -444,7 +494,8 @@ namespace ISC_Win_WinForm_GUI
         }
         private void Device_Connected_Handler(String SerialNumber)
         {
-            this.Text = string.Format("ISC WinForm SDK GUI: {0} (Wavelength Range: {1} - {2}nm)",
+            this.Text = string.Format("ISC WinForm SDK GUI v{0}: {1} (Wavelength Range: {2} - {3}nm)",
+                this.Version,
                 Device.DevInfo.MinWavelength == 900 ? "Standard" : "Extended",
                 Device.DevInfo.MinWavelength, Device.DevInfo.MaxWavelength);
 
@@ -579,20 +630,25 @@ namespace ISC_Win_WinForm_GUI
             if (ActiveIndex < 0)
                 return;
 
+            UI_Setting_Connected();
+            ProgressWindowCompleted();
+
             BeginInvoke((Action)(() => //Invoke at UI thread
             {
                 Chart_Refresh();
+                if (userDefaultReference == ScanReference.Built_in)
+                    RadioButton_RefFac.Checked = true;
+                else if (userDefaultReference == ScanReference.Previous)
+                    RadioButton_RefPre.Checked = true;
+                else
+                    RadioButton_RefNew.Checked = true;
             }), null);
-
-            UI_Setting_Connected();
-            ProgressWindowCompleted();
         }
         private void UI_Setting_Connected()
         {
             Byte[] HWRev = Encoding.ASCII.GetBytes(Device.DevInfo.HardwareRev);
             Int32 MB_Ver = HWRev[0];
 
-            RadioButton_RefNew.Checked = true;
             //TextBox_LampStableTime.Text = LampStableTime.ToString();
             TextBox_LampStableTime.Text = "625";
             CheckBox_AutoGain.Checked = true;
@@ -602,9 +658,9 @@ namespace ISC_Win_WinForm_GUI
             //Device status
             toolStripStatus_DeviceStatus.Image = Properties.Resources.Led_G;
             UpdateDeviceStatusToolTip();
-            OpenColseScanConfigButton(nameof(ScanConfigMode.INITIAL));
+            OpenCloseScanConfigButton(nameof(ScanConfigMode.INITIAL));
 
-            UI_on_connection();//已經連線，會開啟GUI使用     
+            UI_On_Connection();//已經連線，會開啟GUI使用     
 
             EnableCfgItem(false);
             if (!CheckBox_CalWriteEnable.Checked)
@@ -702,13 +758,18 @@ namespace ISC_Win_WinForm_GUI
                     Label_Blename.Enabled = IsActivated;
                     Label_BleNameValue.Enabled = IsActivated;
 
-                    Int32 status = Device.GetButtonLockStatus();
-                    if (status == 1)
-                        Label_ButtonStatus.Text = "Button Status: Locked!";
-                    else if (status == 0)
-                        Label_ButtonStatus.Text = "Button Status: Unlocked!";
+                    if (IsActivated)
+                    {
+                        Int32 status = Device.GetButtonLockStatus();
+                        if (status == 1)
+                            Label_ButtonStatus.Text = "Button Status: Locked!";
+                        else if (status == 0)
+                            Label_ButtonStatus.Text = "Button Status: Unlocked!";
+                        else
+                            Label_ButtonStatus.Text = "Button Status: Read Failed!";
+                    }
                     else
-                        Label_ButtonStatus.Text = "Button Status: Read Failed!";
+                        Label_ButtonStatus.Text = "Button Status: NA";
                 }
             }
             else
@@ -1121,9 +1182,9 @@ namespace ISC_Win_WinForm_GUI
             }
             else
             {
-                RadioButton_RefPre.Checked = false;
-                RadioButton_RefPre.Enabled = false;
                 RadioButton_RefNew.Checked = true;
+                //RadioButton_RefPre.Checked = false;
+                RadioButton_RefPre.Enabled = false;
                 label_ref.Text = "";
                 label_ref.Visible = false;
             }
@@ -1131,7 +1192,7 @@ namespace ISC_Win_WinForm_GUI
 
         private void RadioButton_RefFac_CheckedChanged(object sender, EventArgs e)
         {
-            if (RadioButton_RefFac.Checked == true)
+            if (Device.IsConnected() && RadioButton_RefFac.Checked == true)
             {
                 GetBuildInRefTime();
                 // Checking if a valid ref cal flag
@@ -1164,22 +1225,30 @@ namespace ISC_Win_WinForm_GUI
         {
             if (TargetCfg_SelIndex < 0)
             {
-                String text = "No item selected.";
-                MessageBox.Show(text, "Warning");
+                Message.ShowError("No item selected!");
                 return;
             }
+            else if (ListBox_TargetCfgs.SelectedItems.Count > 1)
+            {
+                Message.ShowError("More than one item are selected!");
+                return;
+            }
+
             ScanConfig.SetTargetActiveScanIndex(TargetCfg_SelIndex);
-            if (DevCurCfg_IsTarget)
-            {
-                SetScanConfig(ScanConfig.TargetConfig[DevCurCfg_Index], true, DevCurCfg_Index);
-            }
-            else
-            {
-                SetScanConfig(LocalConfig[DevCurCfg_Index], false, DevCurCfg_Index);
-            }
-            int bufindex = TargetCfg_SelIndex;
-            RefreshTargetCfgList();
-            ListBox_TargetCfgs.SelectedIndex = bufindex;
+            label_ActiveConfig.Text = ScanConfig.TargetConfig[TargetCfg_SelIndex].head.config_name;
+
+            SetScanConfig(ScanConfig.TargetConfig[TargetCfg_SelIndex], true, TargetCfg_SelIndex);
+            //if (DevCurCfg_IsTarget)
+            //{
+            //    SetScanConfig(ScanConfig.TargetConfig[DevCurCfg_Index], true, DevCurCfg_Index);
+            //}
+            //else
+            //{
+            //    SetScanConfig(LocalConfig[DevCurCfg_Index], false, DevCurCfg_Index);
+            //}
+            //int bufindex = TargetCfg_SelIndex;
+            //RefreshTargetCfgList();
+            //ListBox_TargetCfgs.SelectedIndex = bufindex;
         }
         private void SetScanConfig(ScanConfig.SlewScanConfig Config, Boolean IsTarget, Int32 index)
         {
@@ -1208,7 +1277,7 @@ namespace ISC_Win_WinForm_GUI
 
             }
         }
-        private void ListBox_DeviceScanConfig_SelectedIndexChanged(object sender, EventArgs e)
+        private void ListBox_TargetCfgs_SelectedIndexChanged(object sender, EventArgs e)
         {
             isSelectingConfig = true;
             if (NewConfig == true || EditConfig == true)
@@ -1240,7 +1309,7 @@ namespace ISC_Win_WinForm_GUI
             }
             SelCfg_IsTarget = true;
             FillCfgDetailsContent();
-            OpenColseScanConfigButton(nameof(ScanConfigMode.INITIAL));
+            OpenCloseScanConfigButton(nameof(ScanConfigMode.INITIAL));
             // Clear target listbox index after local config data refreshed.
             if (ListBox_LocalCfgs.SelectedIndex != -1)
                 ListBox_LocalCfgs.SelectedIndex = -1;
@@ -1314,7 +1383,7 @@ namespace ISC_Win_WinForm_GUI
             EnableCfgItem(true);
             NewConfig = true;
             comboBox_cfgNumSec.SelectedItem = "1";
-            OpenColseScanConfigButton(nameof(ScanConfigMode.NEW));
+            OpenCloseScanConfigButton(nameof(ScanConfigMode.NEW));
             TextBox_CfgName.Focus();
             isSelectingConfig = false;
         }
@@ -1322,7 +1391,7 @@ namespace ISC_Win_WinForm_GUI
         private void Button_CfgCancel_Click(object sender, EventArgs e)
         {
             isCancellingConfigEdit = true;
-            OpenColseScanConfigButton(nameof(ScanConfigMode.CANCEL));
+            OpenCloseScanConfigButton(nameof(ScanConfigMode.CANCEL));
             if (NewConfig || EditConfig)
             {
                 int bufindex = 0;
@@ -1378,7 +1447,7 @@ namespace ISC_Win_WinForm_GUI
         private void Button_CfgSave_Click(object sender, EventArgs e)
         {
             EnableCfgItem(false);
-            OpenColseScanConfigButton(nameof(ScanConfigMode.SAVE));
+            OpenCloseScanConfigButton(nameof(ScanConfigMode.SAVE));
             if (IsCfgLegal(true) == SDK.RETURN_FAIL)
             {
                 Message.ShowError("Error configuration data can't be saved!");
@@ -1563,6 +1632,11 @@ namespace ISC_Win_WinForm_GUI
 
         private void Button_CfgDelete_Click(object sender, EventArgs e)
         {
+            bool multipleDelete = false;
+            int restoreIdx = -1;
+
+            SystemBusy(true);
+
             if (SelCfg_IsTarget == true)
             {
                 if (TargetCfg_SelIndex < 0)
@@ -1584,60 +1658,162 @@ namespace ISC_Win_WinForm_GUI
                     return;
                 }
             }
-            OpenColseScanConfigButton(nameof(ScanConfigMode.DELETE));
-            Int32 ActiveIndex = ScanConfig.GetTargetActiveScanIndex();
-            if (ScanConfig.TargetConfig.Count > 1 && SelCfg_IsTarget)
-            {
-                ScanConfig.TargetConfig.RemoveAt(TargetCfg_SelIndex);
-                if (TargetCfg_SelIndex == ActiveIndex)
-                {
-                    ActiveIndex = 0;
-                    ScanConfig.SetTargetActiveScanIndex(ActiveIndex);
-                }
-                else if (TargetCfg_SelIndex < ActiveIndex)
-                {
-                    ActiveIndex--;
-                    ScanConfig.SetTargetActiveScanIndex(ActiveIndex);
-                }
-                Boolean deletecurrentconfig = false;
-                if (TargetCfg_SelIndex == DevCurCfg_Index)//刪到current config,因此將current config 換成機器的active config
-                {
-                    SetScanConfig(ScanConfig.TargetConfig[ActiveIndex], true, ActiveIndex);
-                    deletecurrentconfig = true;
-                }
-                RefreshTargetCfgList();
-                SaveCfgToLocalOrDevice(true);
-                if (deletecurrentconfig)//刪到current config,因此將current config 換成機器的active config
-                {
-                    ListBox_TargetCfgs.SelectedIndex = ActiveIndex;
-                }
-                DBG.WriteLine("Delete this Device configuration");
-            }
+
+            DialogResult dialogResult = Message.ShowQuestion("Are you sure to delete the selected item?", "Delete Config");
+            if (dialogResult == DialogResult.No)
+                return;
+
+            OpenCloseScanConfigButton(nameof(ScanConfigMode.DELETE));
+
+            string curCfgName;
+            bool curCfgDeleted = false;
+
+            if(SelCfg_IsTarget)
+                curCfgName = ScanConfig.TargetConfig[DevCurCfg_Index].head.config_name;
             else
+                curCfgName = LocalConfig[DevCurCfg_Index].head.config_name;
+
+
+            if (ListBox_LocalCfgs.SelectedItems.Count > 0)
             {
-                LocalConfig.RemoveAt(LocalCfg_SelIndex);
-                Boolean deletecurrentconfig = false;
-                if (LocalCfg_SelIndex == DevCurCfg_Index && DevCurCfg_IsTarget == false)//刪到current config,因此將current config 換成機器的active config
+                if (ListBox_LocalCfgs.SelectedItems.Count > 1)
+                    multipleDelete = true;
+                else
                 {
-                    SetScanConfig(ScanConfig.TargetConfig[ActiveIndex], true, ActiveIndex);
-                    deletecurrentconfig = true;
+                    if (ListBox_LocalCfgs.SelectedIndex - 1 >= 0)
+                        restoreIdx = ListBox_LocalCfgs.SelectedIndex - 1;
+                    else
+                        restoreIdx = 0;
+                }
+
+                var selectedItems = new object[ListBox_LocalCfgs.SelectedItems.Count];
+                var selectedIdx = new int[ListBox_LocalCfgs.SelectedItems.Count];
+                ListBox_LocalCfgs.SelectedItems.CopyTo(selectedItems, 0);
+
+                foreach (var item in selectedItems)
+                {
+                    for (int i = 0; i < LocalConfig.Count; i++)
+                    {
+                        var cfg = LocalConfig[i];
+                        if (cfg.head.config_name == item.ToString())
+                        {
+                            if(!SelCfg_IsTarget && curCfgName == item.ToString())
+                            {
+                                string msg = "The currently using scan configuration - " +
+                                    (SelCfg_IsTarget == true ? "Device: " : "Local: ") +
+                                    curCfgName + " will be deleted!\n\nAre you sure?";
+                                DialogResult ret = Message.ShowQuestion(msg, "Confirm Delete");
+                                if (ret == DialogResult.No || ret == DialogResult.Cancel)
+                                    continue;
+                                else
+                                {
+                                    Message.ShowInfo("The current config will be changed to device active config!", "Current Config");
+                                    curCfgDeleted = true;
+                                }
+                            }
+                            LocalConfig.RemoveAt(i);
+                        }
+                    }
                 }
                 RefreshLocalCfgList();
                 SaveCfgToLocalOrDevice(false);
-                if (deletecurrentconfig)//刪到current config,因此將current config 換成機器的active config
-                {
-                    ListBox_TargetCfgs.SelectedIndex = ActiveIndex;
-                }
-                if (ListBox_LocalCfgs.Items.Count == 0 && !deletecurrentconfig)
-                {
-                    Button_CfgNew.Enabled = true;
-                    Button_CfgEdit.Enabled = false;
-                    Button_CfgDelete.Enabled = false;
-                    Button_CfgSave.Enabled = false;
-                    ClearDetailValue();
-                }
             }
+            else if (ListBox_TargetCfgs.SelectedItems.Count > 0)
+            {
+                if (ListBox_TargetCfgs.Items.Count == 1)
+                {
+                    Message.ShowError("The device configuration cannot be empty.");
+                    return;
+                }
+                else if (ListBox_TargetCfgs.SelectedItems.Count > 1)
+                    multipleDelete = true;
+                else
+                {
+                    if (ListBox_TargetCfgs.SelectedIndex - 1 >= 0)
+                        restoreIdx = ListBox_TargetCfgs.SelectedIndex - 1;
+                    else
+                        restoreIdx = 0;
+                }
+
+                int activeCfgIdx = ScanConfig.GetTargetActiveScanIndex();
+                string activeCfgName = ScanConfig.TargetConfig[activeCfgIdx].head.config_name;
+                bool activeCfgDeleted = false;
+
+                var selectedItems = new object[ListBox_TargetCfgs.SelectedItems.Count];
+                var selectedIdx = new int[ListBox_TargetCfgs.SelectedItems.Count];
+                ListBox_TargetCfgs.SelectedItems.CopyTo(selectedItems, 0);
+
+                foreach (var item in selectedItems)
+                {
+                    if (item.ToString() == activeCfgName)
+                        activeCfgDeleted = true;
+
+                    for (int i = 0; i < ScanConfig.TargetConfig.Count; i++)
+                    {
+                        var cfg = ScanConfig.TargetConfig[i];
+                        if (cfg.head.config_name == item.ToString())
+                        {
+                            if (SelCfg_IsTarget && curCfgName == item.ToString())
+                            {
+                                string msg = "The currently using scan configuration - " +
+                                    (SelCfg_IsTarget == true ? "Device: " : "Local: ") +
+                                    curCfgName + " will be deleted!\n\nAre you sure?"; DialogResult ret = Message.ShowQuestion(msg, "Confirm Delete");
+                                if (ret == DialogResult.No || ret == DialogResult.Cancel)
+                                    continue;
+                                else
+                                {
+                                    Message.ShowInfo("The current config will be changed to device active config!", "Current Config");
+                                    curCfgDeleted = true;
+                                }
+                            }
+                            ScanConfig.TargetConfig.RemoveAt(i);
+                        }
+                    }
+                }
+
+                if (activeCfgDeleted)
+                {
+                    ScanConfig.SetTargetActiveScanIndex(0);
+                    SetScanConfig(ScanConfig.TargetConfig[0], true, 0);
+                }
+
+                RefreshTargetCfgList();
+                SaveCfgToLocalOrDevice(true);
+            }
+            else
+                Message.ShowError("No item selected.");
+
+            if (curCfgDeleted)
+            {
+                int ActiveIndex = ScanConfig.GetTargetActiveScanIndex();
+                SetScanConfig(ScanConfig.TargetConfig[ActiveIndex], true, ActiveIndex);
+            }
+            else if (ListBox_LocalCfgs.Items.Count == 0)
+            {
+                Button_CfgNew.Enabled = true;
+                Button_CfgEdit.Enabled = false;
+                Button_CfgDelete.Enabled = false;
+                Button_CfgSave.Enabled = false;
+                ClearDetailValue();
+            }
+            
+            if (multipleDelete)
+            {
+                if (SelCfg_IsTarget)
+                    ListBox_TargetCfgs.SelectedIndex = 0;
+                else if (ListBox_LocalCfgs.Items.Count > 0)
+                    ListBox_LocalCfgs.SelectedIndex = 0;
+            }
+            else if (restoreIdx >= 0)
+            {
+                if (SelCfg_IsTarget)
+                    ListBox_TargetCfgs.SelectedIndex = restoreIdx;
+                else if (ListBox_LocalCfgs.Items.Count > 0)
+                    ListBox_LocalCfgs.SelectedIndex = restoreIdx;
+            }
+
             isSelectingConfig = false;
+            SystemBusy(false);
         }
 
         private void Button_CfgEdit_Click(object sender, EventArgs e)
@@ -1663,7 +1839,7 @@ namespace ISC_Win_WinForm_GUI
             EnableCfgItem(true);
             NewConfig = false;
             EditConfig = true;
-            OpenColseScanConfigButton(nameof(ScanConfigMode.EDIT));
+            OpenCloseScanConfigButton(nameof(ScanConfigMode.EDIT));
             TextBox_CfgName.Focus();
             isSelectingConfig = false;
         }
@@ -2070,6 +2246,66 @@ namespace ISC_Win_WinForm_GUI
                 Message.ShowWarning(text);
                 ret = SDK.RETURN_FAIL;
             }
+
+            return ret;
+        }
+
+        private Int32 IsCfgValidForSaveToDevice(ScanConfig.SlewScanConfig cfg)
+        {
+            Int32 ret = SDK.RETURN_PASS;
+            Int32 TotalPatterns = 0;
+
+            // Config Name
+            if (cfg.head.config_name == String.Empty)
+                ret = SDK.RETURN_FAIL;
+
+            // Num Scans to Average
+            if (cfg.head.num_repeats == 0)
+                ret = SDK.RETURN_FAIL;
+
+            // Sections
+            for (Byte i = 0; i < cfg.head.num_sections; i++)
+            {
+                // Start nm
+                if (cfg.section[i].wavelength_start_nm < Device.DevInfo.MinWavelength)
+                    ret = SDK.RETURN_FAIL;
+
+                // End nm
+                if (cfg.section[i].wavelength_end_nm > Device.DevInfo.MaxWavelength || cfg.section[i].wavelength_end_nm < Device.DevInfo.MinWavelength)
+                    ret = SDK.RETURN_FAIL;
+                if (cfg.section[i].wavelength_start_nm >= cfg.section[i].wavelength_end_nm)
+                    ret = SDK.RETURN_FAIL;
+
+                // Check Max Patterns
+                Int32 MaxPattern = 0;
+                Int32 HadPattern = 0;
+ 
+                MaxPattern = ScanConfig.GetMaxResolutions(cfg, i);
+                if ((cfg.section[i].section_scan_type == 0 && cfg.section[i].num_patterns < 2) ||  // Column Mode
+                    (cfg.section[i].section_scan_type == 1 && cfg.section[i].num_patterns < 3) ||  // Hadamard Mode
+                    (cfg.section[i].num_patterns > MaxPattern) ||
+                    (MaxPattern <= 0))
+                {
+                    if (MaxPattern < 0) MaxPattern = 0;
+                    ret = SDK.RETURN_FAIL;
+                }
+                else
+                {
+                    HadPattern = ScanConfig.GetHadamardUsedPatterns(cfg, i);
+
+                    if (cfg.section[i].num_patterns > MaxPattern)
+                        ret = SDK.RETURN_FAIL;
+                }
+
+                if (HadPattern != -1)
+                    TotalPatterns += HadPattern;
+                else
+                    TotalPatterns += cfg.section[i].num_patterns;
+            }
+
+            // Check total patterns
+            if (TotalPatterns > 624)
+                ret = SDK.RETURN_FAIL;
 
             return ret;
         }
@@ -2595,10 +2831,20 @@ namespace ISC_Win_WinForm_GUI
                             Button_CalRestoreDefaultCoeffs.Enabled = true;
                         }
 
+                        GroupBox_BleName.Enabled = true;
+                        Label_Blename.Enabled = true;
+                        Label_BleNameValue.Enabled = true;
+
                         Label_ButtonStatus.Enabled = true;
                         Button_LockButton.Enabled = true;
                         Button_UnlockButton.Enabled = true;
-                        GroupBox_BleName.Enabled = true;
+                        Int32 status = Device.GetButtonLockStatus();
+                        if (status == 1)
+                            Label_ButtonStatus.Text = "Button Status: Locked!";
+                        else if (status == 0)
+                            Label_ButtonStatus.Text = "Button Status: Unlocked!";
+                        else
+                            Label_ButtonStatus.Text = "Button Status: Read Failed!";
 
                         toolStripStatus_DeviceStatus.Text = (Device.DevInfo.MinWavelength == 900 ? "Standard Wavelength " : "Extended Wavelength ") +
                             "Device: " + Device.DevInfo.ModelName + " (" + Device.DevInfo.SerialNumber + ")";
@@ -2628,7 +2874,13 @@ namespace ISC_Win_WinForm_GUI
                         Label_ButtonStatus.Enabled = false;
                         Button_LockButton.Enabled = false;
                         Button_UnlockButton.Enabled = false;
+                        Label_ButtonStatus.Text = "Button Status: NA";
+
                         GroupBox_BleName.Enabled = false;
+                        Label_Blename.Enabled = false;
+                        Label_BleNameValue.Enabled = false;
+                        Label_BleNameValue.Text = "NA";
+
                         toolStripStatus_DeviceStatus.Text = (Device.DevInfo.MinWavelength == 900 ? "Standard Wavelength " : "Extended Wavelength ") +
                             "Device: " + Device.DevInfo.ModelName + " (" + Device.DevInfo.SerialNumber + "), advanced functions locked!";
                         label_ActivateStatus.Text = "Not Activated!";
@@ -2837,35 +3089,51 @@ namespace ISC_Win_WinForm_GUI
 
             if (SaveOneCSVFile)
             {
+                bool fileOpenFailed = false;
                 if (OneScanFileName == String.Empty)
                     OneScanFileName = FileName;
 
                 String FileName_one = OneScanFileName.Insert(OneScanFileName.LastIndexOf("_", OneScanFileName.Length - 20), "_combined");
 
-                using (FileStream fs = new FileStream(FileName_one, FileMode.Append, FileAccess.Write))
+                try
                 {
-                    using (StreamWriter sw = new StreamWriter(fs, System.Text.Encoding.UTF8))
+                    using (FileStream fs = new FileStream(FileName_one, FileMode.Append, FileAccess.Write))
                     {
-                        if (fs.Length == 0)
+                        using (StreamWriter sw = new StreamWriter(fs, System.Text.Encoding.UTF8))
                         {
-                            SaveHeader_CSV(sw);
+                            if (fs.Length == 0)
+                            {
+                                SaveHeader_CSV(sw);
 
-                            sw.Write("Wavelength (nm),");
-                            for (Int32 i = 0; i < Scan.ScanDataLen; i++)
-                                sw.Write(Scan.WaveLength[i] + ",");
-                            sw.Write("\n");
+                                sw.Write("Wavelength (nm),");
+                                for (Int32 i = 0; i < Scan.ScanDataLen; i++)
+                                    sw.Write(Scan.WaveLength[i] + ",");
+                                sw.Write("\n");
 
-                            sw.Write("Reference Signal (unitless),");
+                                sw.Write("Reference Signal (unitless),");
+                                for (Int32 i = 0; i < Scan.ScanDataLen; i++)
+                                    sw.Write(Scan.ReferenceIntensity[i] + ",");
+                                sw.Write("\n");
+                            }
+
+                            sw.Write("Sample Signal (unitless),");
                             for (Int32 i = 0; i < Scan.ScanDataLen; i++)
-                                sw.Write(Scan.ReferenceIntensity[i] + ",");
+                                sw.Write(Scan.Intensity[i] + ",");
                             sw.Write("\n");
                         }
-
-                        sw.Write("Sample Signal (unitless),");
-                        for (Int32 i = 0; i < Scan.ScanDataLen; i++)
-                            sw.Write(Scan.Intensity[i] + ",");
-                        sw.Write("\n");
                     }
+                }
+                catch
+                {
+                    Thread t = new Thread(ProgressWindowCompleted);
+                    t.Start();
+                    ScannedCounts = 0;
+                    UserCancelScan = true;
+                    OneScanFileName = String.Empty;
+                    SaveOneCSVFile = false;
+                    Button_Scan.Text = "Scan";
+                    SDK.IsConnectionChecking = true;
+                    MessageBox.Show(this, "Open CSV file for saving failed!\nThe file might be corrupted or openned by other application.", "Save File Error", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
                 }
 
                 if (TargetScanCounts == ScannedCounts)
@@ -3517,6 +3785,7 @@ namespace ISC_Win_WinForm_GUI
                     ScannedCounts = 0;
                     Button_Scan.Text = "Scan";
                     SDK.IsConnectionChecking = true;
+                    ProgressWindowCompleted();
                 }
             }
             else
@@ -3525,6 +3794,7 @@ namespace ISC_Win_WinForm_GUI
                 UserCancelScan = true;
                 Button_Scan.Text = "Scan";
                 MessageBox.Show(text, "Error");
+                ProgressWindowCompleted();
             }
         }
         #endregion
@@ -3551,6 +3821,7 @@ namespace ISC_Win_WinForm_GUI
             DialogResult result = Message.ShowQuestion("Do you want to write it?", "Model Name", MessageBoxButtons.YesNo);
             if (result == DialogResult.Yes)
             {
+                SystemBusy(true);
                 if (Device.SetModelName(Helper.CheckRegex(TextBox_ModelName.Text.PadLeft(16, '\0'))) == 0)
                 {
                     if (Device.Information() != 0)
@@ -3566,6 +3837,7 @@ namespace ISC_Win_WinForm_GUI
                 }
                 else
                     TextBox_ModelName.Text = "Write Failed!";
+                SystemBusy(false);
             }
             if (TextBox_BLE_Display_Name.Text != "")
                 Button_Get_BLE_Display_Name_Click(null, null);
@@ -3578,6 +3850,7 @@ namespace ISC_Win_WinForm_GUI
             DialogResult result = Message.ShowQuestion("Do you want to write it?", "Serial Number", MessageBoxButtons.YesNo);
             if (result == DialogResult.Yes)
             {
+                SystemBusy(true);
                 if (Device.SetSerialNumber(Helper.CheckRegex(TextBox_SerialNumber.Text.PadLeft(8, '\0'))) == 0)
                 {
                     if (Device.Information() != 0)
@@ -3591,6 +3864,7 @@ namespace ISC_Win_WinForm_GUI
                 }
                 else
                     TextBox_SerialNumber.Text = "Write Failed!";
+                SystemBusy(false);
             }
             if (TextBox_BLE_Display_Name.Text != "")
                 Button_Get_BLE_Display_Name_Click(null, null);
@@ -3618,6 +3892,7 @@ namespace ISC_Win_WinForm_GUI
             DialogResult result = Message.ShowQuestion("Do you want to sync. it?", "Date and Time", MessageBoxButtons.YesNo);
             if (result == DialogResult.Yes)
             {
+                SystemBusy(true);
                 Device.DeviceDateTime DevDateTime = new Device.DeviceDateTime();
                 DateTime Current = DateTime.Now;
 
@@ -3633,6 +3908,7 @@ namespace ISC_Win_WinForm_GUI
                     TextBox_DateTime.Text = Current.ToString("yyyy/M/d  H:m:s");
                 else
                     TextBox_DateTime.Text = "Sync Failed!";
+                SystemBusy(false);
             }
         }
 
@@ -3682,6 +3958,7 @@ namespace ISC_Win_WinForm_GUI
             DialogResult result = Message.ShowQuestion("Do you want to write it?", "Lamp Usage", MessageBoxButtons.YesNo);
             if (result == DialogResult.Yes)
             {
+                SystemBusy(true);
                 if (Double.TryParse(TextBox_LampUsage.Text, out Double LampUsage) == false)
                 {
                     TextBox_LampUsage.Text = "Not Numeric!";
@@ -3693,6 +3970,7 @@ namespace ISC_Win_WinForm_GUI
                 else
                     TextBox_LampUsage.Text = "Write Failed!";
                 GetDeviceInfo();
+                SystemBusy(false);
             }
         }
 
@@ -3708,6 +3986,7 @@ namespace ISC_Win_WinForm_GUI
         //Sensors
         private void Button_SensorRead_Click(object sender, EventArgs e)
         {
+            SystemBusy(true);
             if (Device.ReadSensorsData() == 0)
             {
                 Label_SensorBattStatus.Text = Device.DevSensors.BattStatus;
@@ -3803,6 +4082,7 @@ namespace ISC_Win_WinForm_GUI
 
                 Scan.SetLamp(Scan.LAMP_CONTROL.AUTO);
             }
+            SystemBusy(false);
         }
         #endregion
         #region Tiva FW update
@@ -4250,6 +4530,9 @@ namespace ISC_Win_WinForm_GUI
         {
             if (!Device.IsConnected())
                 return;
+
+            SystemBusy(true);
+
             String GUIRev = Assembly.GetExecutingAssembly().GetName().Version.ToString();
             GUIRev = GUIRev.Substring(0, GUIRev.LastIndexOf('.'));
 
@@ -4336,14 +4619,16 @@ namespace ISC_Win_WinForm_GUI
                 }
                 else
                     Label_BleNameValue.Text = "NA";
+                if (!IsActivated)
+                    Label_ButtonStatus.Text = "Button Status: NA";
                 pOutBuf.Clear();
             }
+            SystemBusy(false);
         }
         private void CheckLampFuncUseful()
         {
             if (!Device.IsConnected())
                 return;
-
             String Model = (!String.IsNullOrEmpty(Device.DevInfo.ModelName)) ? Device.DevInfo.ModelName : String.Empty;
             Model = (Model != String.Empty) ? Model.Substring(Model.LastIndexOf('-') + 1, 1) : String.Empty;
             // Convert main board version to ASCII
@@ -4465,10 +4750,17 @@ namespace ISC_Win_WinForm_GUI
         //Activation Key
         private void button_KeySet_Click(object sender, EventArgs e)
         {
+            String[] StrKey = TextBox_Key.Text.Split(new char[] { ' ', ':', ';', '-', '_' });
+            if (StrKey.Length != 12)
+            {
+                Message.ShowError("Input Key Length / Format Is Not Correct!");
+                return;
+            }
+            
             DialogResult result = Message.ShowQuestion("Do you want to set it?", "Key", MessageBoxButtons.YesNo);
             if (result == DialogResult.Yes)
             {
-                String[] StrKey = TextBox_Key.Text.Split(new char[] { ' ', ':', ';', '-', '_' });
+                SystemBusy(true);
                 Byte[] ByteKey = new Byte[12];
 
                 for (int i = 0; i < StrKey.Length; i++)
@@ -4505,17 +4797,18 @@ namespace ISC_Win_WinForm_GUI
                     SaveAKeyToFile(ItemsList);
 
                     label_ActivateStatus.Text = "Activated!";
-                    GUI_Handler((int)MainWindow.GUI_State.KEY_ACTIVATE);
                     // Self refresh device information
                     GetDeviceInfo();
+                    SystemBusy(false);
+                    GUI_Handler((int)MainWindow.GUI_State.KEY_ACTIVATE);
                 }
                 else
                 {
                     label_ActivateStatus.Text = "Not activated!";
-                    label_DevInfoLampUsageValue.Text = "";
+                    label_DevInfoLampUsageValue.Text = "NA";
+                    SystemBusy(false);
                     GUI_Handler((int)MainWindow.GUI_State.KEY_NOT_ACTIVATE);
                 }
-
                 CheckLampFuncUseful();
             }
         }
@@ -4750,6 +5043,7 @@ namespace ISC_Win_WinForm_GUI
             DialogResult result = Message.ShowQuestion("Do you want to restore it?", "Restore Factory Reference", MessageBoxButtons.YesNo);
             if (result == DialogResult.Yes)
             {
+                SystemBusy(true);
                 if (Device.IsConnected())
                 {
                     int ret;
@@ -4802,6 +5096,7 @@ namespace ISC_Win_WinForm_GUI
                     String text = "No device connected for restoring factory reference!";
                     MessageBox.Show(text, "Warning");
                 }
+                SystemBusy(false);
             }
 
         }
@@ -4851,10 +5146,12 @@ namespace ISC_Win_WinForm_GUI
 
         private void Button_Clear_BLE_Display_Name_Click(object sender, EventArgs e)
         {
+            SystemBusy(true);
             if (Device.WriteBleDispName("") == SDK.RETURN_PASS)
                 Button_Get_BLE_Display_Name_Click(sender, e);
             else
                 TextBox_BLE_Display_Name.Text = "Clear Failed!";
+            SystemBusy(false);
         }
 
         private void Button_Set_BLE_Display_Name_Click(object sender, EventArgs e)
@@ -4864,6 +5161,7 @@ namespace ISC_Win_WinForm_GUI
             DialogResult result = Message.ShowQuestion("Do you want to write it?", "Bluetooth LE Advertising Name", MessageBoxButtons.YesNo);
             if (result == DialogResult.Yes)
             {
+                SystemBusy(true);
                 String RegularExpressions = "^[a-zA-Z0-9_<>{}-]*[^\r\t\n\f]*$";
                 Match rgx = Regex.Match(BLE_Name, RegularExpressions);
                 if (!rgx.Success)
@@ -4897,6 +5195,7 @@ namespace ISC_Win_WinForm_GUI
                     Button_Get_BLE_Display_Name_Click(sender, e);
                 else
                     TextBox_BLE_Display_Name.Text = "Write Failed!";
+                SystemBusy(false);
             }
         }
 
@@ -5004,7 +5303,7 @@ namespace ISC_Win_WinForm_GUI
             ListBox_TargetCfgs.BackColor = System.Drawing.Color.White;
         }
 
-        private void UI_on_connection()
+        private void UI_On_Connection()
         {
             ControlAllControls(this, true);
             if (RadioButton_RefNew.Checked)
@@ -5029,18 +5328,20 @@ namespace ISC_Win_WinForm_GUI
         {
             if (tabControl_MainFunctions.SelectedIndex != 0)
             {
-                if (tabControl_MainFunctions.SelectedIndex != 2)
-                    GetDeviceInfo();
                 if (NewConfig == true || EditConfig == true)
                     Button_CfgCancel_Click(this, e);
-                Scan.SetLamp(Scan.LAMP_CONTROL.OFF_SCAN);
-                Scan.SetLamp(Scan.LAMP_CONTROL.AUTO);
+                if (!RadioButton_LampStableTime.Checked)
+                {
+                    Scan.SetLamp(Scan.LAMP_CONTROL.OFF_SCAN);
+                    Scan.SetLamp(Scan.LAMP_CONTROL.AUTO);
+                }
             }
             else if (tabControl_MainFunctions.SelectedIndex == 0)
             {
                 CheckBox_LampOn.Checked = false;
                 RadioButton_LampStableTime.Checked = true;
-                Scan.SetLamp(Scan.LAMP_CONTROL.AUTO);
+                if (!RadioButton_LampStableTime.Checked)
+                    Scan.SetLamp(Scan.LAMP_CONTROL.AUTO);
             }
         }
 
@@ -5127,24 +5428,22 @@ namespace ISC_Win_WinForm_GUI
             });
             MyChart.AxisY.Add(new Axis { Title = "Intensity" });
         }
-        private void ListBox_DeviceScanConfig_MouseDoubleClick(object sender, MouseEventArgs e)
-        {
-            int ret = IsCfgLegal(true);
 
-            if (ret == SDK.RETURN_FAIL)
+        private void ListBox_TargetCfgs_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            if (ListBox_TargetCfgs.SelectedItems.Count < 1)
+                return;
+
+            if (IsCfgLegal(true) == SDK.RETURN_FAIL)
             {
                 Message.ShowError("Apply the selected config failed!\n\nPlease fix it and retry again!");
                 return;
             }
 
-            if (TargetCfg_SelIndex >= 0)
-            {
-                SetScanConfig(ScanConfig.TargetConfig[TargetCfg_SelIndex], true, TargetCfg_SelIndex);
-                RefreshLocalCfgList();
-                RefreshTargetCfgList();
-                ListBox_TargetCfgs.SelectedIndex = DevCurCfg_Index;
+            SetScanConfig(ScanConfig.TargetConfig[TargetCfg_SelIndex], true, TargetCfg_SelIndex);
+
+            if (userDefaultReference != ScanReference.Built_in)
                 RadioButton_RefPre_CheckedChanged(null, null);
-            }
         }
         #region Local Config
         private void LoadLocalCfgList()
@@ -5218,7 +5517,7 @@ namespace ISC_Win_WinForm_GUI
 
             SelCfg_IsTarget = false;
             FillCfgDetailsContent();
-            OpenColseScanConfigButton(nameof(ScanConfigMode.INITIAL));
+            OpenCloseScanConfigButton(nameof(ScanConfigMode.INITIAL));
             // Clear target listbox index after local config data refreshed.
             if (ListBox_TargetCfgs.SelectedIndex != -1)
             {
@@ -5230,92 +5529,85 @@ namespace ISC_Win_WinForm_GUI
         }
         private void ListBox_LocalCfgs_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-            int ret = IsCfgLegal(true);
+            if (ListBox_LocalCfgs.SelectedItems.Count < 1)
+                return;
 
-            if (ret == SDK.RETURN_FAIL)
+            if (IsCfgLegal(true) == SDK.RETURN_FAIL)
             {
                 Message.ShowError("Apply the selected config failed!\n\nPlease fix it and retry again!");
                 return;
             }
 
-            if (LocalCfg_SelIndex >= 0)
-            {
-                SetScanConfig(LocalConfig[LocalCfg_SelIndex], false, LocalCfg_SelIndex);
-                RefreshLocalCfgList();
-                RefreshTargetCfgList();
-                ListBox_LocalCfgs.SelectedIndex = DevCurCfg_Index;
+            SetScanConfig(LocalConfig[LocalCfg_SelIndex], false, LocalCfg_SelIndex);
+
+            if (userDefaultReference != ScanReference.Built_in)
                 RadioButton_RefPre_CheckedChanged(null, null);
-            }
         }
         private void Button_CopyCfgL2T_Click(object sender, EventArgs e)
-        {
-            int index = 0;
+        {            
+            int targetIdx = 0, localIdx = 0;
             if (LocalCfg_SelIndex < 0)
             {
                 Message.ShowWarning("No item selected.");
                 return;
             }
 
-            foreach (string cfgName in ListBox_TargetCfgs.Items)
+            if (ListBox_LocalCfgs.SelectedItems.Count + ScanConfig.TargetConfig.Count > 20)
             {
-                if (ListBox_LocalCfgs.SelectedItem.ToString() == cfgName)
-                {
-                    Message.ShowError("Duplicated config name found!\n\nStop copying config.");
-                    return;
-                }
-            }
-
-            if (ScanConfig.TargetConfig.Count >= 20)//Confirm the current number of device configuration before saving
-            {
-                Message.ShowWarning("Number of scan configs in device cannot exceed 20.");
+                Message.ShowError("There is not enough space (total 20) to copy configs into device!");
                 return;
             }
 
-            int ret = IsCfgLegal(true);
+            SystemBusy(true);
 
-            if (ret == SDK.RETURN_FAIL)
+            var selectedItems = new object[ListBox_LocalCfgs.SelectedItems.Count];
+            ListBox_LocalCfgs.SelectedItems.CopyTo(selectedItems, 0);
+
+            foreach (var item in selectedItems)
             {
-                Message.ShowError("Copy the selected config failed!\n\nPlease fix it and retry again!");
-                return;
+                CheckConfigName(item.ToString(), true, ref localIdx);
+
+                if (IsCfgValidForSaveToDevice(LocalConfig[localIdx]) == SDK.RETURN_FAIL)
+                {
+                    String msg = "The config - \"" + item.ToString() + "\" is not applicable for the device!\n\nIgnore the copy action!";
+                    Message.ShowError(msg);
+                    continue;
+                }
+
+                if (CheckConfigName(item.ToString(), false, ref targetIdx))
+                {
+                    String msg = "The config - \"" + item.ToString() + "\" has exist, do you want to overwrite?";
+                    DialogResult Result = Message.ShowQuestion(msg, null, MessageBoxButtons.YesNo);
+                    if (Result == DialogResult.No)
+                        continue;
+                    else if (Result == DialogResult.Yes)
+                        ScanConfig.TargetConfig[targetIdx] = LocalConfig[localIdx];
+                }
+                else
+                    ScanConfig.TargetConfig.Add(LocalConfig[localIdx]);
             }
 
-            if (CheckConfigName(ListBox_LocalCfgs.Items[ListBox_LocalCfgs.SelectedIndex].ToString(), false, ref index))
-            {
-                DialogResult Result = Message.ShowQuestion("The config has exist, do you want to overwrite?", null, MessageBoxButtons.YesNo);
-                if (Result == DialogResult.No)
-                {
-                    return;
-                }
-                if (Result == DialogResult.Yes)
-                {
-                    ScanConfig.TargetConfig[index] = LocalConfig[LocalCfg_SelIndex];
-                    RefreshTargetCfgList();
-                    SaveCfgToLocalOrDevice(true);
-                    ListBox_TargetCfgs.SelectedIndex = index;
-                    return;
-                }
-            }
-            ScanConfig.TargetConfig.Add(LocalConfig[LocalCfg_SelIndex]);
             RefreshTargetCfgList();
             SaveCfgToLocalOrDevice(true);
+            ListBox_LocalCfgs.SelectedItem = localIdx;
+            SystemBusy(false);
         }
+
         private Int32 SaveCfgToLocalOrDevice(Boolean IsTarget)
         {
             Int32 ret = SDK.RETURN_FAIL;
 
             if (IsTarget == true)
             {
-                if ((ret = ScanConfig.SetConfigList()) == 0)
-                    Message.ShowInfo("Device Config List Update Success!");
-                else
-                    Message.ShowError("Device Config List Update Failed!");
+                if ((ret = ScanConfig.SetConfigList()) != SDK.RETURN_PASS)
+                    Message.ShowError("Device Config List Wrote Failed!");
                 if (EditConfig)
                 {
                     ListBox_TargetCfgs.SelectedIndex = EditSelectIndex;
                 }
                 else
                 {
-                    ListBox_TargetCfgs.SelectedIndex = ListBox_TargetCfgs.Items.Count - 1;
+                    //ListBox_TargetCfgs.SelectedIndex = ListBox_TargetCfgs.Items.Count - 1;
                 }
             }
             else
@@ -5336,7 +5628,6 @@ namespace ISC_Win_WinForm_GUI
                 TextWriter writer = new StreamWriter(FileName);
                 xml.Serialize(writer, LocalConfig);
                 writer.Close();
-                Message.ShowInfo("Local Config List Update Success!");
                 ret = SDK.RETURN_PASS;
                 if (EditConfig)
                 {
@@ -5344,196 +5635,199 @@ namespace ISC_Win_WinForm_GUI
                 }
                 else
                 {
-                    ListBox_LocalCfgs.SelectedIndex = ListBox_LocalCfgs.Items.Count - 1;
+                    //ListBox_LocalCfgs.SelectedIndex = ListBox_LocalCfgs.Items.Count - 1;
                 }
             }
-
             return ret;
         }
         private void Button_CopyCfgT2L_Click(object sender, EventArgs e)
         {
-            int index = 0;
+            int localIdx = 0, targetIdx = 0;
             if (TargetCfg_SelIndex < 0)
             {
                 Message.ShowWarning("No item selected.");
                 return;
             }
 
-            if (CheckConfigName(ListBox_TargetCfgs.Items[ListBox_TargetCfgs.SelectedIndex].ToString(), true, ref index))
+            SystemBusy(true);
+            var selectedItems = new object[ListBox_TargetCfgs.SelectedItems.Count];
+            ListBox_TargetCfgs.SelectedItems.CopyTo(selectedItems, 0);
+
+            foreach (var item in selectedItems)
             {
-                DialogResult Result = Message.ShowQuestion("The config has exist, do you want to overwrite?", null, MessageBoxButtons.YesNo);
-                if (Result == DialogResult.No)
+                CheckConfigName(item.ToString(), false, ref targetIdx);
+
+                if (CheckConfigName(item.ToString(), true, ref localIdx))
                 {
-                    return;
+                    String msg = "The config - \"" + item.ToString() + "\" has exist, do you want to overwrite?";
+                    DialogResult Result = Message.ShowQuestion(msg, null, MessageBoxButtons.YesNo);
+                    if (Result == DialogResult.No)
+                        continue;
+                    else if (Result == DialogResult.Yes)
+                        LocalConfig[localIdx] = ScanConfig.TargetConfig[targetIdx];
                 }
-                if (Result == DialogResult.Yes)
-                {
-                    LocalConfig[index] = ScanConfig.TargetConfig[TargetCfg_SelIndex];
-                    RefreshLocalCfgList();
-                    SaveCfgToLocalOrDevice(false);
-                    ListBox_LocalCfgs.SelectedIndex = index;
-                    return;
-                }
+                else
+                    LocalConfig.Add(ScanConfig.TargetConfig[targetIdx]);
             }
 
-            LocalConfig.Add(ScanConfig.TargetConfig[TargetCfg_SelIndex]);
             RefreshLocalCfgList();
             SaveCfgToLocalOrDevice(false);
+            ListBox_TargetCfgs.SelectedIndex = targetIdx;
+            SystemBusy(false);
         }
         private void Button_MoveCfgL2T_Click(object sender, EventArgs e)
         {
-            int index = 0;
+            int targetIdx = 0, lastIdx = 0;
             if (LocalCfg_SelIndex < 0)
             {
                 Message.ShowWarning("No item selected.");
                 return;
             }
 
-            if (ScanConfig.TargetConfig.Count >= 20)//Confirm the current number of device configuration before saving
+            if (ListBox_LocalCfgs.SelectedItems.Count + ScanConfig.TargetConfig.Count > 20)
             {
-                Message.ShowWarning("Number of scan configs in device cannot exceed 20.");
+                Message.ShowError("There is not enough space (total 20) to copy configs into device!");
                 return;
             }
 
-            int ret = IsCfgLegal(true);
+            SystemBusy(true);
 
-            if (ret == SDK.RETURN_FAIL)
-            {
-                Message.ShowError("Move the selected config failed!\n\nPlease fix it and retry again!");
-                return;
-            }
+            var selectedItems = new object[ListBox_LocalCfgs.SelectedItems.Count];
+            List<string> itemToRemove = new List<string>();
+            ListBox_LocalCfgs.SelectedItems.CopyTo(selectedItems, 0);
 
-            if (CheckConfigName(ListBox_LocalCfgs.Items[ListBox_LocalCfgs.SelectedIndex].ToString(), false, ref index))
+            foreach (var item in selectedItems)
             {
-                DialogResult Result = Message.ShowQuestion("The config has exist, do you want to overwrite?", null, MessageBoxButtons.YesNo);
-                if (Result == DialogResult.No)
+                int localIdx = 0;
+                CheckConfigName(item.ToString(), true, ref localIdx);
+
+                if (IsCfgValidForSaveToDevice(LocalConfig[localIdx]) == SDK.RETURN_FAIL)
                 {
-                    return;
+                    String msg = "The config - \"" + item.ToString() + "\" is not applicable for the device!\n\nIgnore the move action!";
+                    Message.ShowError(msg);
+                    continue;
                 }
-                if (Result == DialogResult.Yes)
+
+                if (CheckConfigName(item.ToString(), false, ref targetIdx))
                 {
-                    if (DevCurCfg_Index == LocalCfg_SelIndex)
+                    String msg = "The config - \"" + item.ToString() + "\" is existed, do you want to overwrite?";
+                    DialogResult Result = Message.ShowQuestion(msg, null, MessageBoxButtons.YesNo);
+                    if (Result == DialogResult.No)
+                        continue;
+                    else if (Result == DialogResult.Yes)
                     {
-                        // Clear previous scan data
-                        ClearScanPlotsUI();
-                        Button_Scan.Enabled = false;
-                    }
-                    ScanConfig.TargetConfig[index] = LocalConfig[LocalCfg_SelIndex];
-                    LocalConfig.RemoveAt(LocalCfg_SelIndex);
-                    RefreshLocalCfgList();
-                    SaveCfgToLocalOrDevice(false);
-                    RefreshTargetCfgList();
-                    SaveCfgToLocalOrDevice(true);
-                    ListBox_TargetCfgs.SelectedIndex = index;
-                    if (DevCurCfg_Index == TargetCfg_SelIndex)
-                    {
-                        SetScanConfig(ScanConfig.TargetConfig[TargetCfg_SelIndex], true, TargetCfg_SelIndex);
+                        ScanConfig.TargetConfig[targetIdx] = LocalConfig[localIdx];
+                        itemToRemove.Add(item.ToString());
+                        lastIdx = targetIdx;
                     }
                 }
-            }
-            else
-            {
-                if (DevCurCfg_Index == LocalCfg_SelIndex)
+                else
                 {
-                    // Clear previous scan data
-                    ClearScanPlotsUI();
-                    Button_Scan.Enabled = false;
+                    ScanConfig.TargetConfig.Add(LocalConfig[localIdx]);
+                    itemToRemove.Add(item.ToString());
+                    lastIdx = ScanConfig.TargetConfig.Count - 1;
                 }
-                ScanConfig.TargetConfig.Add(LocalConfig[LocalCfg_SelIndex]);
-                LocalConfig.RemoveAt(LocalCfg_SelIndex);
-                RefreshLocalCfgList();
-                SaveCfgToLocalOrDevice(false);
-                RefreshTargetCfgList();
-                ListBox_TargetCfgs.SelectedIndex = ScanConfig.TargetConfig.Count - 1;
-                SaveCfgToLocalOrDevice(true);
             }
+
+            foreach (var item in itemToRemove)
+            {
+                for (int i = 0; i < LocalConfig.Count; i++)
+                {
+                    var cfg = LocalConfig[i];
+                    if (cfg.head.config_name == item)
+                    {
+                        LocalConfig.RemoveAt(i);
+                        break;
+                    }
+                }
+            }
+
+            RefreshLocalCfgList();
+            SaveCfgToLocalOrDevice(false);
+            RefreshTargetCfgList();
+            SaveCfgToLocalOrDevice(true);
+            ListBox_TargetCfgs.SelectedIndex = lastIdx;
+            SystemBusy(false);
         }
         private void Button_MoveCfgT2L_Click(object sender, EventArgs e)
         {
-            int index = 0;
+            int localIdx = 0, lastIdx = 0;
             if (TargetCfg_SelIndex < 0)
             {
                 Message.ShowWarning("No item selected.");
                 return;
             }
 
-            if (ListBox_TargetCfgs.Items.Count < 2)
+            if (ListBox_TargetCfgs.SelectedItems.Count == ListBox_TargetCfgs.Items.Count)
             {
-                Message.ShowError("The device configuration cannot be empty.");
+                Message.ShowError("The device configuration cannot be empty after move.\n\nPlease leave one configuration at least!");
                 return;
             }
 
-            if (CheckConfigName(ListBox_TargetCfgs.Items[ListBox_TargetCfgs.SelectedIndex].ToString(), true, ref index))
+            SystemBusy(true);
+            int activeCfgIdx = ScanConfig.GetTargetActiveScanIndex();
+            string activeCfgName = ScanConfig.TargetConfig[activeCfgIdx].head.config_name;
+            bool activeCfgDeleted = false;
+
+            var selectedItems = new object[ListBox_TargetCfgs.SelectedItems.Count];
+            List<string> itemToRemove = new List<string>();
+            ListBox_TargetCfgs.SelectedItems.CopyTo(selectedItems, 0);
+
+            foreach (var item in selectedItems)
             {
-                DialogResult Result = Message.ShowQuestion("The config has exist, do you want to overwrite?", null, MessageBoxButtons.YesNo);
-                if (Result == DialogResult.No)
-                {
-                    return;
-                }
-                if (Result == DialogResult.Yes)
-                {
-                    if (DevCurCfg_Index == TargetCfg_SelIndex)
-                    {
-                        Message.ShowWarning("Device current configuration will be moved,\n" +
-                                               "please set a new one to device later,\n" +
-                                               "or you can not do scan.");
+                int targetIdx = 0;
 
-                        // Clear previous scan data
-                        ClearScanPlotsUI();
-                        Button_Scan.Enabled = false;
+                CheckConfigName(item.ToString(), false, ref targetIdx);
+
+                if (CheckConfigName(item.ToString(), true, ref localIdx))
+                {
+                    String msg = "The config - \"" + item.ToString() + "\" is existed, do you want to overwrite?";
+                    DialogResult Result = Message.ShowQuestion(msg, null, MessageBoxButtons.YesNo);
+                    if (Result == DialogResult.No)
+                        continue;
+                    else if (Result == DialogResult.Yes)
+                    {
+                        LocalConfig[localIdx] = ScanConfig.TargetConfig[targetIdx];
+                        itemToRemove.Add(item.ToString());
+                        lastIdx = localIdx;
                     }
-                    Int32 ActiveIndex = ScanConfig.GetTargetActiveScanIndex();
+                }
+                else
+                {
+                    LocalConfig.Add(ScanConfig.TargetConfig[targetIdx]);
+                    itemToRemove.Add(item.ToString());
+                    lastIdx = LocalConfig.Count - 1;
+                }
+            }
 
-                    LocalConfig[index] = ScanConfig.TargetConfig[TargetCfg_SelIndex];
-                    ScanConfig.TargetConfig.RemoveAt(TargetCfg_SelIndex);
-                    if (TargetCfg_SelIndex == ActiveIndex)
-                        ActiveIndex = 0;
-                    else if (TargetCfg_SelIndex < ActiveIndex)
-                        ActiveIndex--;
-                    ScanConfig.SetTargetActiveScanIndex(ActiveIndex);
+            foreach (var item in itemToRemove)
+            {
+                for (int i = 0; i < ScanConfig.TargetConfig.Count; i++)
+                {
+                    if (item.ToString() == activeCfgName)
+                        activeCfgDeleted = true;
 
-                    RefreshTargetCfgList();
-                    SaveCfgToLocalOrDevice(true);
-                    RefreshLocalCfgList();
-                    SaveCfgToLocalOrDevice(false);
-                    ListBox_LocalCfgs.SelectedIndex = index;
-                    if (DevCurCfg_Index == LocalCfg_SelIndex)
+                    var cfg = ScanConfig.TargetConfig[i];
+                    if (cfg.head.config_name == item)
                     {
-                        SetScanConfig(LocalConfig[LocalCfg_SelIndex], false, LocalCfg_SelIndex);
+                        ScanConfig.TargetConfig.RemoveAt(i);
+                        break;
                     }
                 }
             }
-            else
+
+            if (activeCfgDeleted)
             {
-                if (DevCurCfg_Index == TargetCfg_SelIndex)
-                {
-                    Message.ShowWarning("Device current configuration will be moved,\n" +
-                                           "please set a new one to device later,\n" +
-                                           "or you can not do scan.");
-
-                    // Clear previous scan data
-                    ClearScanPlotsUI();
-
-                    Button_Scan.Enabled = false;
-                }
-
-                Int32 ActiveIndex = ScanConfig.GetTargetActiveScanIndex();
-
-                LocalConfig.Add(ScanConfig.TargetConfig[TargetCfg_SelIndex]);
-                ScanConfig.TargetConfig.RemoveAt(TargetCfg_SelIndex);
-                if (TargetCfg_SelIndex == ActiveIndex)
-                    ActiveIndex = 0;
-                else if (TargetCfg_SelIndex < ActiveIndex)
-                    ActiveIndex--;
-                ScanConfig.SetTargetActiveScanIndex(ActiveIndex);
-
-                RefreshTargetCfgList();
-                SaveCfgToLocalOrDevice(true);
-                RefreshLocalCfgList();
-                ListBox_LocalCfgs.SelectedIndex = LocalConfig.Count - 1;
-                SaveCfgToLocalOrDevice(false);
+                ScanConfig.SetTargetActiveScanIndex(0);
+                SetScanConfig(ScanConfig.TargetConfig[0], true, 0);
             }
 
+            RefreshTargetCfgList();
+            SaveCfgToLocalOrDevice(true);
+            RefreshLocalCfgList();
+            SaveCfgToLocalOrDevice(false);
+            ListBox_LocalCfgs.SelectedIndex = lastIdx;
+            SystemBusy(false);
         }
         private Boolean CheckConfigName(String name, Boolean checklocal, ref int index)
         {
@@ -5652,7 +5946,7 @@ namespace ISC_Win_WinForm_GUI
             Label_CurrentConfig.Text = String.Empty;
             Label_EstimatedScanTime.Text = String.Empty;
         }
-        private void OpenColseScanConfigButton(String mode)
+        private void OpenCloseScanConfigButton(String mode)
         {
             switch (mode)
             {
@@ -5861,6 +6155,7 @@ namespace ISC_Win_WinForm_GUI
         private void ProgressWindowStart(String title, String content, Boolean cancellable)
         {
             ProgressWindowCompleted();
+            SystemBusy(true);
             t_PBW = new Thread(() =>
             {
                 ProgressWindow(title, content, cancellable);
@@ -5882,13 +6177,10 @@ namespace ISC_Win_WinForm_GUI
 
         private void ProgressWindowCompleted()
         {
+            SystemBusy(false);
             if (t_PBW != null && t_PBW.IsAlive != false)
             {
-                try
-                {
-                    RequestPBWClose();
-                }
-                catch { }
+                SendPBWClose = true;
             }
         }
 
@@ -6040,6 +6332,13 @@ namespace ISC_Win_WinForm_GUI
                 Button_CfgEdit.Enabled = false;
                 Button_CfgDelete.Enabled = false;
                 ClearDetailValue();
+                SelCfg_IsTarget = true;
+            }
+            else
+            {
+                ListBox_LocalCfgs.BackColor = System.Drawing.Color.AliceBlue;
+                ListBox_TargetCfgs.BackColor = System.Drawing.Color.White;
+                SelCfg_IsTarget = false;
             }
         }
         private void ClearDetailValue()
@@ -6321,6 +6620,121 @@ namespace ISC_Win_WinForm_GUI
         {
             if (e.KeyCode == Keys.Delete)
                 dataGridView_Delete_Items();
+        }
+
+        private void Label_CurrentConfig_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (e != null) //&& e.Button == MouseButtons.Right)
+            {
+                ContextMenuStrip m = new ContextMenuStrip();
+
+                var localCfgItems = new object[ListBox_LocalCfgs.Items.Count];
+                var targetCfgItems = new object[ListBox_TargetCfgs.Items.Count];
+
+                ListBox_TargetCfgs.Items.CopyTo(targetCfgItems, 0);
+                ListBox_LocalCfgs.Items.CopyTo(localCfgItems, 0);
+
+                foreach (var item in targetCfgItems)
+                    m.Items.Add("Device: " + item.ToString());
+
+                m.Items.Add(new ToolStripSeparator());
+
+                foreach (var item in localCfgItems)
+                    m.Items.Add("Local: " + item.ToString());
+
+                m.ItemClicked += new ToolStripItemClickedEventHandler(Label_CurrentConfig_ContexMenu_ItemClicked);
+                m.Show(Label_CurrentConfig, new Point(e.X, e.Y));
+            }
+        }
+
+        void Label_CurrentConfig_ContexMenu_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+            SystemBusy(true);
+            ToolStripItem item = e.ClickedItem;
+            string fullCfgName = item.Text;
+            string[] cfgName = fullCfgName.Split(':');
+            cfgName[1] = cfgName[1].Substring(1);
+            int selIdx = 0;
+            switch (cfgName[0])
+            {
+                case "Device":
+                    {
+                        CheckConfigName(cfgName[1], false, ref selIdx);
+                        SetScanConfig(ScanConfig.TargetConfig[selIdx], true, selIdx);
+                    }
+                    break;
+                case "Local":
+                    {
+                        CheckConfigName(cfgName[1], true, ref selIdx);
+
+                        if (IsCfgValidForSaveToDevice(LocalConfig[selIdx]) == SDK.RETURN_FAIL)
+                        {
+                            String msg = "The config - \"" + item.ToString() + "\" is not applicable for the device!\n\nSet config failed!";
+                            Message.ShowError(msg);
+                        }
+                        else
+                        {
+                            SetScanConfig(LocalConfig[selIdx], false, selIdx);
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
+            if (userDefaultReference != ScanReference.Built_in)
+                RadioButton_RefPre_CheckedChanged(null, null);
+            SystemBusy(false);
+        }
+
+        private void ListBox_TargetCfgs_MouseClick(object sender, MouseEventArgs e)
+        {
+            ListBox_LocalCfgs.BackColor = System.Drawing.Color.White;
+            ListBox_TargetCfgs.BackColor = System.Drawing.Color.AliceBlue;
+            SelCfg_IsTarget = true;
+        }
+
+        static bool prevSysBusyState = false;
+        private void SystemBusy(bool enable)
+        {           
+            Console.WriteLine("Set system busy: " + enable);
+            if (enable ^ prevSysBusyState)
+            {
+                if (enable)
+                    SpecificCtrlIgnoreList.Clear();
+                prevSysBusyState = enable;
+                ControlSpecificControls(this, "Button", !enable);
+            }
+            Cursor.Current = enable ? Cursors.WaitCursor : Cursors.Default;  
+        }
+
+        static List<string> SpecificCtrlIgnoreList = new List<string>();
+        private void ControlSpecificControls(Control con, String typeName, bool enable)
+        {
+            foreach (Control c in con.Controls)
+            {
+                ControlSpecificControls(c, typeName, enable);
+            }
+            if (con.GetType().Name == typeName)
+            {
+                if (!enable)
+                {
+                    if (con.Enabled == false)
+                    {
+                        SpecificCtrlIgnoreList.Add(con.Name);
+                    }
+                    else
+                    {
+                        con.Enabled = enable;
+                    }
+                }
+                else
+                {
+                    if (!SpecificCtrlIgnoreList.Contains(con.Name))
+                    {
+                        con.Enabled = enable;
+                    }
+                }
+            }
         }
     }
 }

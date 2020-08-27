@@ -16,37 +16,16 @@ namespace ISC_Win_WinForm_GUI
         /// </summary>
         static String[] DeprecatedProductName = { "DLP-NIR-Win-SDK", "ISC-NIRScan", "ISC-WinForm-SDK", "ISC-WinForm-GUI" };
         static String TiEvmProductName = "NirscanNanoGUI";
-        static String WinISCGuiProductName = "Win-ISC-GUI";
         [STAThread]
-        static void Main()
+        static void Main(string[] args)
         {
             Process currentProc = Process.GetCurrentProcess();
             String currentProcName = currentProc.ProcessName;
             String currentProdName = Application.ProductName;
 
-            if (System.Diagnostics.Process.GetProcessesByName(currentProcName).Length > 1)
-            {
-                DialogResult ret = Message.ShowQuestion("Existing ISC NIRScan SDK GUI detected!\n\nClose all existig GUI?");
-
-                if (ret == DialogResult.Yes)
-                {
-                    Process[] p = Process.GetProcessesByName(currentProcName).ToArray();
-                    foreach (Process thisProc in p)
-                    {
-                        if (thisProc.Id != currentProc.Id)
-                            thisProc.Kill();
-                    }
-                }
-                else
-                {
-                    Message.ShowError("GUI launch failed!\n\nPlease close other related GUI's and retry again.");
-                    return;
-                }
-            }
-
             if (System.Diagnostics.Process.GetProcessesByName(TiEvmProductName).Length > 0)
             {
-                DialogResult ret = Message.ShowQuestion("Existing TI EVM GUI detected!\n\nClose all existig App?");
+                DialogResult ret = Message.ShowQuestion("Existing TI EVM GUI detected!\n\nClose all the existig TI EVM GUI?");
 
                 if (ret == DialogResult.Yes)
                 {
@@ -56,24 +35,7 @@ namespace ISC_Win_WinForm_GUI
                 }
                 else
                 {
-                    Message.ShowError("GUI launch failed!\n\nPlease close other related GUI's and retry again.");
-                    return;
-                }
-            }
-
-            if (System.Diagnostics.Process.GetProcessesByName(WinISCGuiProductName).Length > 0)
-            {
-                DialogResult ret = Message.ShowQuestion("Existing ISC GUI detected!\n\nClose all existig App?");
-
-                if (ret == DialogResult.Yes)
-                {
-                    Process[] p = Process.GetProcessesByName(WinISCGuiProductName).ToArray();
-                    foreach (Process thisProc in p)
-                        thisProc.Kill();
-                }
-                else
-                {
-                    Message.ShowError("GUI launch failed!\n\nPlease close other related GUI's and retry again.");
+                    Message.ShowError("GUI launch stopped!\n\nPlease close the existig TI EVM GUI before start the program.");
                     return;
                 }
             }
@@ -86,29 +48,47 @@ namespace ISC_Win_WinForm_GUI
                     MatchCollection matches = Regex.Matches(p.ProcessName, pattern);
                     if (matches.Count > 0)
                     {
-                        DialogResult ret;
+                        DialogResult ret = DialogResult.Cancel;
                         if (p.MainModule.FileVersionInfo.ProductName == currentProdName && p.Id == currentProc.Id)
                             continue;
 
                         if (p.ProcessName.Contains("Qt"))
-                            ret = Message.ShowQuestion("Existing ISC Factory GUI detected!\n\nClose the existig App?");
-                        else
-                            ret = Message.ShowQuestion("Existing old ISC NIRScan GUI detected!\n\nClose the existig App?");
+                            ret = Message.ShowQuestion("Existing ISC Factory GUI detected!\n\nClose the existig ISC Factory GUI?");
 
                         if (ret == DialogResult.Yes)
                             p.Kill();
-                        else
+                        else if(ret == DialogResult.No)
                         {
-                            Message.ShowError("GUI launch failed!\n\nPlease close other related GUI's and retry again.");
+                            Message.ShowError("GUI launch stopped!\n\nPlease close other related GUI's before start the program.");
                             return;
                         }
                     }
                 }
             }
 
+            if (System.Diagnostics.Process.GetProcessesByName(currentProcName).Length > 1)
+            {
+                DialogResult ret = Message.ShowQuestion("Existing ISC NIRScan SDK GUI detected!\n\nClose all other existig GUI?");
+
+                if (ret == DialogResult.Yes)
+                {
+                    Process[] p = Process.GetProcessesByName(currentProcName).ToArray();
+                    foreach (Process thisProc in p)
+                    {
+                        if (thisProc.Id != currentProc.Id)
+                            thisProc.Kill();
+                    }
+                }
+                else
+                {
+                    Message.ShowError("GUI launch stopped!\n\nPlease close other related GUI's before start the program.");
+                    return;
+                }
+            }
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new MainWindow());
+            Application.Run(new MainWindow(args));
         }
     }
 }

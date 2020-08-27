@@ -12,6 +12,8 @@ namespace ISC_Win_WinForm_GUI
 {
     public partial class ProgressBar : Form
     {
+        public static event Action UserCancelRequest = null;
+        internal static bool SendUserCancelRequest { set { UserCancelRequest(); } }
         public ProgressBar(String Title, String Content, Boolean Cancellable)
         {
             InitializeComponent();
@@ -43,8 +45,6 @@ namespace ISC_Win_WinForm_GUI
 
         private void button_cancel_Click(object sender, EventArgs e)
         {
-            MainWindow.UserCancelScan = true;
-            
             button_cancel.Width = button_cancel.Width * 2;
             Point newLocation = new Point();
             newLocation.X = this.Width / 2 - button_cancel.Width / 2;
@@ -52,6 +52,8 @@ namespace ISC_Win_WinForm_GUI
             button_cancel.Location = newLocation;
             button_cancel.Text = "Cancelling...";
             button_cancel.Enabled = false;
+
+            SendUserCancelRequest = true;
         }
 
         private const int CP_NOCLOSE_BUTTON = 0x200;

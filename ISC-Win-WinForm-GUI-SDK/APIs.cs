@@ -15,7 +15,7 @@ namespace ISC_Win_WinForm_GUI
             if (string.IsNullOrEmpty(Caption))
                 Caption = "Information";
 
-            MessageBox.Show(Text, Caption, MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1, MessageBoxOptions.ServiceNotification);
+            MessageBox.Show(Text, Caption, MessageBoxButtons.OK, MessageBoxIcon.Information, MessageBoxDefaultButton.Button1);
         }
 
         public static void ShowWarning(string Text, string Caption = null)
@@ -23,7 +23,7 @@ namespace ISC_Win_WinForm_GUI
             if (string.IsNullOrEmpty(Caption))
                 Caption = "Warning";
 
-            MessageBox.Show(Text, Caption, MessageBoxButtons.OK, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1, MessageBoxOptions.ServiceNotification);
+            MessageBox.Show(Text, Caption, MessageBoxButtons.OK, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button1);
         }
 
         public static void ShowError(string Text, string Caption = null)
@@ -31,7 +31,7 @@ namespace ISC_Win_WinForm_GUI
             if (string.IsNullOrEmpty(Caption))
                 Caption = "Error";
 
-            MessageBox.Show(Text, Caption, MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.ServiceNotification);
+            MessageBox.Show(Text, Caption, MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1);
         }
 
         public static DialogResult ShowQuestion(string Text, string Caption = null, MessageBoxButtons Button = MessageBoxButtons.YesNo)

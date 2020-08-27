@@ -96,6 +96,8 @@ namespace ISC_Win_WinForm_GUI
             this.RadioButton_RefPre = new System.Windows.Forms.RadioButton();
             this.RadioButton_RefNew = new System.Windows.Forms.RadioButton();
             this.tabPage_ScanConfig = new System.Windows.Forms.TabPage();
+            this.label16 = new System.Windows.Forms.Label();
+            this.label15 = new System.Windows.Forms.Label();
             this.Button_MoveCfgT2L = new System.Windows.Forms.Button();
             this.Button_MoveCfgL2T = new System.Windows.Forms.Button();
             this.Button_CopyCfgT2L = new System.Windows.Forms.Button();
@@ -470,6 +472,7 @@ namespace ISC_Win_WinForm_GUI
             this.checkBox_zoom.Name = "checkBox_zoom";
             this.checkBox_zoom.Size = new System.Drawing.Size(103, 18);
             this.checkBox_zoom.TabIndex = 13;
+            this.checkBox_zoom.TabStop = false;
             this.checkBox_zoom.Text = "Zoom and Pan";
             this.checkBox_zoom.UseVisualStyleBackColor = true;
             this.checkBox_zoom.CheckedChanged += new System.EventHandler(this.checkBox_zoom_CheckedChanged);
@@ -481,6 +484,7 @@ namespace ISC_Win_WinForm_GUI
             this.checkBox_tooltip.Name = "checkBox_tooltip";
             this.checkBox_tooltip.Size = new System.Drawing.Size(66, 18);
             this.checkBox_tooltip.TabIndex = 12;
+            this.checkBox_tooltip.TabStop = false;
             this.checkBox_tooltip.Text = "ToolTip";
             this.checkBox_tooltip.UseVisualStyleBackColor = true;
             this.checkBox_tooltip.CheckedChanged += new System.EventHandler(this.checkBox_tooltip_CheckedChanged);
@@ -493,6 +497,7 @@ namespace ISC_Win_WinForm_GUI
             this.Check_Overlay.Name = "Check_Overlay";
             this.Check_Overlay.Size = new System.Drawing.Size(66, 18);
             this.Check_Overlay.TabIndex = 9;
+            this.Check_Overlay.TabStop = false;
             this.Check_Overlay.Text = "Overlay";
             this.Check_Overlay.UseVisualStyleBackColor = true;
             this.Check_Overlay.CheckedChanged += new System.EventHandler(this.Check_Overlay_CheckedChanged);
@@ -569,6 +574,8 @@ namespace ISC_Win_WinForm_GUI
             this.Label_CurrentConfig.Name = "Label_CurrentConfig";
             this.Label_CurrentConfig.Size = new System.Drawing.Size(235, 27);
             this.Label_CurrentConfig.TabIndex = 2;
+            this.toolTip1.SetToolTip(this.Label_CurrentConfig, "Current scan configuration for scan");
+            this.Label_CurrentConfig.MouseClick += new System.Windows.Forms.MouseEventHandler(this.Label_CurrentConfig_MouseClick);
             // 
             // Label_ScanStatus
             // 
@@ -653,6 +660,7 @@ namespace ISC_Win_WinForm_GUI
             this.checkBox_StopOnError.Name = "checkBox_StopOnError";
             this.checkBox_StopOnError.Size = new System.Drawing.Size(193, 18);
             this.checkBox_StopOnError.TabIndex = 15;
+            this.checkBox_StopOnError.TabStop = false;
             this.checkBox_StopOnError.Text = "Stop continuous scans on error";
             this.checkBox_StopOnError.UseVisualStyleBackColor = true;
             // 
@@ -726,6 +734,7 @@ namespace ISC_Win_WinForm_GUI
             this.CheckBox_AutoGain.Name = "CheckBox_AutoGain";
             this.CheckBox_AutoGain.Size = new System.Drawing.Size(51, 18);
             this.CheckBox_AutoGain.TabIndex = 2;
+            this.CheckBox_AutoGain.TabStop = false;
             this.CheckBox_AutoGain.Text = "Auto";
             this.CheckBox_AutoGain.UseVisualStyleBackColor = true;
             this.CheckBox_AutoGain.CheckedChanged += new System.EventHandler(this.CheckBox_AutoGain_CheckedChanged);
@@ -745,6 +754,7 @@ namespace ISC_Win_WinForm_GUI
             this.ComboBox_PGAGain.Name = "ComboBox_PGAGain";
             this.ComboBox_PGAGain.Size = new System.Drawing.Size(100, 22);
             this.ComboBox_PGAGain.TabIndex = 1;
+            this.ComboBox_PGAGain.TabStop = false;
             // 
             // label1
             // 
@@ -824,6 +834,7 @@ namespace ISC_Win_WinForm_GUI
             this.CheckBox_SaveRJDX.Name = "CheckBox_SaveRJDX";
             this.CheckBox_SaveRJDX.Size = new System.Drawing.Size(107, 18);
             this.CheckBox_SaveRJDX.TabIndex = 8;
+            this.CheckBox_SaveRJDX.TabStop = false;
             this.CheckBox_SaveRJDX.Text = "-reflectance.jdx";
             this.CheckBox_SaveRJDX.UseVisualStyleBackColor = true;
             this.CheckBox_SaveRJDX.CheckedChanged += new System.EventHandler(this.CheckBox_SaveFileFormat_Click);
@@ -835,6 +846,7 @@ namespace ISC_Win_WinForm_GUI
             this.CheckBox_SaveAJDX.Name = "CheckBox_SaveAJDX";
             this.CheckBox_SaveAJDX.Size = new System.Drawing.Size(112, 18);
             this.CheckBox_SaveAJDX.TabIndex = 7;
+            this.CheckBox_SaveAJDX.TabStop = false;
             this.CheckBox_SaveAJDX.Text = "-absorbance.jdx";
             this.CheckBox_SaveAJDX.UseVisualStyleBackColor = true;
             this.CheckBox_SaveAJDX.CheckedChanged += new System.EventHandler(this.CheckBox_SaveFileFormat_Click);
@@ -846,6 +858,7 @@ namespace ISC_Win_WinForm_GUI
             this.CheckBox_SaveIJDX.Name = "CheckBox_SaveIJDX";
             this.CheckBox_SaveIJDX.Size = new System.Drawing.Size(95, 18);
             this.CheckBox_SaveIJDX.TabIndex = 6;
+            this.CheckBox_SaveIJDX.TabStop = false;
             this.CheckBox_SaveIJDX.Text = "-intensity.jdx";
             this.CheckBox_SaveIJDX.UseVisualStyleBackColor = true;
             this.CheckBox_SaveIJDX.CheckedChanged += new System.EventHandler(this.CheckBox_SaveFileFormat_Click);
@@ -857,6 +870,7 @@ namespace ISC_Win_WinForm_GUI
             this.CheckBox_SaveOneCSV.Name = "CheckBox_SaveOneCSV";
             this.CheckBox_SaveOneCSV.Size = new System.Drawing.Size(103, 18);
             this.CheckBox_SaveOneCSV.TabIndex = 2;
+            this.CheckBox_SaveOneCSV.TabStop = false;
             this.CheckBox_SaveOneCSV.Text = "-combined.csv";
             this.CheckBox_SaveOneCSV.UseVisualStyleBackColor = true;
             this.CheckBox_SaveOneCSV.CheckedChanged += new System.EventHandler(this.CheckBox_SaveFileFormat_Click);
@@ -877,6 +891,7 @@ namespace ISC_Win_WinForm_GUI
             this.CheckBox_FileNamePrefix.Name = "CheckBox_FileNamePrefix";
             this.CheckBox_FileNamePrefix.Size = new System.Drawing.Size(113, 18);
             this.CheckBox_FileNamePrefix.TabIndex = 11;
+            this.CheckBox_FileNamePrefix.TabStop = false;
             this.CheckBox_FileNamePrefix.Text = "File Name Prefix";
             this.CheckBox_FileNamePrefix.UseVisualStyleBackColor = true;
             this.CheckBox_FileNamePrefix.CheckedChanged += new System.EventHandler(this.CheckBox_FileNamePrefix_CheckedChanged);
@@ -888,6 +903,7 @@ namespace ISC_Win_WinForm_GUI
             this.TextBox_SaveDirPath.ReadOnly = true;
             this.TextBox_SaveDirPath.Size = new System.Drawing.Size(269, 22);
             this.TextBox_SaveDirPath.TabIndex = 9;
+            this.TextBox_SaveDirPath.TabStop = false;
             // 
             // Button_SaveDirChange
             // 
@@ -906,6 +922,7 @@ namespace ISC_Win_WinForm_GUI
             this.CheckBox_SaveRCSV.Name = "CheckBox_SaveRCSV";
             this.CheckBox_SaveRCSV.Size = new System.Drawing.Size(108, 18);
             this.CheckBox_SaveRCSV.TabIndex = 5;
+            this.CheckBox_SaveRCSV.TabStop = false;
             this.CheckBox_SaveRCSV.Text = "-reflectance.csv";
             this.CheckBox_SaveRCSV.UseVisualStyleBackColor = true;
             this.CheckBox_SaveRCSV.CheckedChanged += new System.EventHandler(this.CheckBox_SaveFileFormat_Click);
@@ -917,6 +934,7 @@ namespace ISC_Win_WinForm_GUI
             this.CheckBox_SaveACSV.Name = "CheckBox_SaveACSV";
             this.CheckBox_SaveACSV.Size = new System.Drawing.Size(113, 18);
             this.CheckBox_SaveACSV.TabIndex = 4;
+            this.CheckBox_SaveACSV.TabStop = false;
             this.CheckBox_SaveACSV.Text = "-absorbance.csv";
             this.CheckBox_SaveACSV.UseVisualStyleBackColor = true;
             this.CheckBox_SaveACSV.CheckedChanged += new System.EventHandler(this.CheckBox_SaveFileFormat_Click);
@@ -928,6 +946,7 @@ namespace ISC_Win_WinForm_GUI
             this.CheckBox_SaveICSV.Name = "CheckBox_SaveICSV";
             this.CheckBox_SaveICSV.Size = new System.Drawing.Size(96, 18);
             this.CheckBox_SaveICSV.TabIndex = 3;
+            this.CheckBox_SaveICSV.TabStop = false;
             this.CheckBox_SaveICSV.Text = "-intensity.csv";
             this.CheckBox_SaveICSV.UseVisualStyleBackColor = true;
             this.CheckBox_SaveICSV.CheckedChanged += new System.EventHandler(this.CheckBox_SaveFileFormat_Click);
@@ -941,6 +960,7 @@ namespace ISC_Win_WinForm_GUI
             this.CheckBox_SaveDAT.Name = "CheckBox_SaveDAT";
             this.CheckBox_SaveDAT.Size = new System.Drawing.Size(53, 18);
             this.CheckBox_SaveDAT.TabIndex = 1;
+            this.CheckBox_SaveDAT.TabStop = false;
             this.CheckBox_SaveDAT.Text = "*.dat";
             this.CheckBox_SaveDAT.UseVisualStyleBackColor = true;
             this.CheckBox_SaveDAT.CheckedChanged += new System.EventHandler(this.CheckBox_SaveFileFormat_Click);
@@ -954,6 +974,7 @@ namespace ISC_Win_WinForm_GUI
             this.CheckBox_SaveCombCSV.Name = "CheckBox_SaveCombCSV";
             this.CheckBox_SaveCombCSV.Size = new System.Drawing.Size(51, 18);
             this.CheckBox_SaveCombCSV.TabIndex = 0;
+            this.CheckBox_SaveCombCSV.TabStop = false;
             this.CheckBox_SaveCombCSV.Text = "*.csv";
             this.CheckBox_SaveCombCSV.UseVisualStyleBackColor = true;
             this.CheckBox_SaveCombCSV.CheckedChanged += new System.EventHandler(this.CheckBox_SaveFileFormat_Click);
@@ -1003,10 +1024,11 @@ namespace ISC_Win_WinForm_GUI
             // CheckBox_LampOn
             // 
             this.CheckBox_LampOn.AutoSize = true;
-            this.CheckBox_LampOn.Location = new System.Drawing.Point(20, 21);
+            this.CheckBox_LampOn.Location = new System.Drawing.Point(20, 22);
             this.CheckBox_LampOn.Name = "CheckBox_LampOn";
             this.CheckBox_LampOn.Size = new System.Drawing.Size(103, 18);
             this.CheckBox_LampOn.TabIndex = 0;
+            this.CheckBox_LampOn.TabStop = false;
             this.CheckBox_LampOn.Text = "Keep Lamp On";
             this.CheckBox_LampOn.UseVisualStyleBackColor = true;
             this.CheckBox_LampOn.CheckedChanged += new System.EventHandler(this.CheckBox_LampOn_CheckedChanged);
@@ -1040,7 +1062,6 @@ namespace ISC_Win_WinForm_GUI
             this.RadioButton_LampOff.Name = "RadioButton_LampOff";
             this.RadioButton_LampOff.Size = new System.Drawing.Size(102, 18);
             this.RadioButton_LampOff.TabIndex = 1;
-            this.RadioButton_LampOff.TabStop = true;
             this.RadioButton_LampOff.Text = "Keep Lamp Off";
             this.RadioButton_LampOff.UseVisualStyleBackColor = true;
             this.RadioButton_LampOff.CheckedChanged += new System.EventHandler(this.RadioButton_LampOff_CheckedChanged);
@@ -1052,7 +1073,6 @@ namespace ISC_Win_WinForm_GUI
             this.RadioButton_LampOn.Name = "RadioButton_LampOn";
             this.RadioButton_LampOn.Size = new System.Drawing.Size(102, 18);
             this.RadioButton_LampOn.TabIndex = 0;
-            this.RadioButton_LampOn.TabStop = true;
             this.RadioButton_LampOn.Text = "Keep Lamp On";
             this.RadioButton_LampOn.UseVisualStyleBackColor = true;
             this.RadioButton_LampOn.CheckedChanged += new System.EventHandler(this.RadioButton_LampOn_CheckedChanged);
@@ -1086,7 +1106,6 @@ namespace ISC_Win_WinForm_GUI
             this.RadioButton_RefFac.Name = "RadioButton_RefFac";
             this.RadioButton_RefFac.Size = new System.Drawing.Size(66, 18);
             this.RadioButton_RefFac.TabIndex = 2;
-            this.RadioButton_RefFac.TabStop = true;
             this.RadioButton_RefFac.Text = "Built-in";
             this.RadioButton_RefFac.UseVisualStyleBackColor = true;
             this.RadioButton_RefFac.CheckedChanged += new System.EventHandler(this.RadioButton_RefFac_CheckedChanged);
@@ -1098,7 +1117,6 @@ namespace ISC_Win_WinForm_GUI
             this.RadioButton_RefPre.Name = "RadioButton_RefPre";
             this.RadioButton_RefPre.Size = new System.Drawing.Size(71, 18);
             this.RadioButton_RefPre.TabIndex = 1;
-            this.RadioButton_RefPre.TabStop = true;
             this.RadioButton_RefPre.Text = "Previous";
             this.RadioButton_RefPre.UseVisualStyleBackColor = true;
             this.RadioButton_RefPre.CheckedChanged += new System.EventHandler(this.RadioButton_RefPre_CheckedChanged);
@@ -1118,6 +1136,8 @@ namespace ISC_Win_WinForm_GUI
             // 
             // tabPage_ScanConfig
             // 
+            this.tabPage_ScanConfig.Controls.Add(this.label16);
+            this.tabPage_ScanConfig.Controls.Add(this.label15);
             this.tabPage_ScanConfig.Controls.Add(this.Button_MoveCfgT2L);
             this.tabPage_ScanConfig.Controls.Add(this.Button_MoveCfgL2T);
             this.tabPage_ScanConfig.Controls.Add(this.Button_CopyCfgT2L);
@@ -1141,9 +1161,29 @@ namespace ISC_Win_WinForm_GUI
             this.tabPage_ScanConfig.Text = "Scan Config";
             this.tabPage_ScanConfig.UseVisualStyleBackColor = true;
             // 
+            // label16
+            // 
+            this.label16.BackColor = System.Drawing.Color.LightGray;
+            this.label16.Location = new System.Drawing.Point(223, 38);
+            this.label16.Name = "label16";
+            this.label16.Size = new System.Drawing.Size(161, 14);
+            this.label16.TabIndex = 47;
+            this.label16.Text = "Device configurations";
+            this.label16.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // label15
+            // 
+            this.label15.BackColor = System.Drawing.Color.LightGray;
+            this.label15.Location = new System.Drawing.Point(6, 38);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(161, 14);
+            this.label15.TabIndex = 46;
+            this.label15.Text = "Local configurations";
+            this.label15.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
             // Button_MoveCfgT2L
             // 
-            this.Button_MoveCfgT2L.Location = new System.Drawing.Point(173, 174);
+            this.Button_MoveCfgT2L.Location = new System.Drawing.Point(173, 189);
             this.Button_MoveCfgT2L.Name = "Button_MoveCfgT2L";
             this.Button_MoveCfgT2L.Size = new System.Drawing.Size(44, 37);
             this.Button_MoveCfgT2L.TabIndex = 45;
@@ -1153,7 +1193,7 @@ namespace ISC_Win_WinForm_GUI
             // 
             // Button_MoveCfgL2T
             // 
-            this.Button_MoveCfgL2T.Location = new System.Drawing.Point(173, 130);
+            this.Button_MoveCfgL2T.Location = new System.Drawing.Point(173, 145);
             this.Button_MoveCfgL2T.Name = "Button_MoveCfgL2T";
             this.Button_MoveCfgL2T.Size = new System.Drawing.Size(44, 38);
             this.Button_MoveCfgL2T.TabIndex = 44;
@@ -1163,7 +1203,7 @@ namespace ISC_Win_WinForm_GUI
             // 
             // Button_CopyCfgT2L
             // 
-            this.Button_CopyCfgT2L.Location = new System.Drawing.Point(173, 86);
+            this.Button_CopyCfgT2L.Location = new System.Drawing.Point(173, 101);
             this.Button_CopyCfgT2L.Name = "Button_CopyCfgT2L";
             this.Button_CopyCfgT2L.Size = new System.Drawing.Size(44, 38);
             this.Button_CopyCfgT2L.TabIndex = 43;
@@ -1173,7 +1213,7 @@ namespace ISC_Win_WinForm_GUI
             // 
             // Button_CopyCfgL2T
             // 
-            this.Button_CopyCfgL2T.Location = new System.Drawing.Point(173, 40);
+            this.Button_CopyCfgL2T.Location = new System.Drawing.Point(173, 55);
             this.Button_CopyCfgL2T.Name = "Button_CopyCfgL2T";
             this.Button_CopyCfgL2T.Size = new System.Drawing.Size(44, 40);
             this.Button_CopyCfgL2T.TabIndex = 42;
@@ -1185,9 +1225,10 @@ namespace ISC_Win_WinForm_GUI
             // 
             this.ListBox_LocalCfgs.FormattingEnabled = true;
             this.ListBox_LocalCfgs.ItemHeight = 14;
-            this.ListBox_LocalCfgs.Location = new System.Drawing.Point(6, 40);
+            this.ListBox_LocalCfgs.Location = new System.Drawing.Point(6, 54);
             this.ListBox_LocalCfgs.Name = "ListBox_LocalCfgs";
-            this.ListBox_LocalCfgs.Size = new System.Drawing.Size(161, 186);
+            this.ListBox_LocalCfgs.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
+            this.ListBox_LocalCfgs.Size = new System.Drawing.Size(161, 172);
             this.ListBox_LocalCfgs.TabIndex = 40;
             this.toolTip1.SetToolTip(this.ListBox_LocalCfgs, "Local Config List");
             this.ListBox_LocalCfgs.MouseClick += new System.Windows.Forms.MouseEventHandler(this.ListBox_LocalCfgs_MouseClick);
@@ -1201,22 +1242,23 @@ namespace ISC_Win_WinForm_GUI
             this.label_ActiveConfig.ForeColor = System.Drawing.SystemColors.MenuHighlight;
             this.label_ActiveConfig.Location = new System.Drawing.Point(224, 21);
             this.label_ActiveConfig.Name = "label_ActiveConfig";
-            this.label_ActiveConfig.Size = new System.Drawing.Size(44, 14);
+            this.label_ActiveConfig.Size = new System.Drawing.Size(53, 14);
             this.label_ActiveConfig.TabIndex = 10;
-            this.label_ActiveConfig.Text = "Column";
+            this.label_ActiveConfig.Text = "Column 1";
             this.label_ActiveConfig.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // ListBox_TargetCfgs
             // 
             this.ListBox_TargetCfgs.FormattingEnabled = true;
             this.ListBox_TargetCfgs.ItemHeight = 14;
-            this.ListBox_TargetCfgs.Location = new System.Drawing.Point(223, 40);
+            this.ListBox_TargetCfgs.Location = new System.Drawing.Point(223, 54);
             this.ListBox_TargetCfgs.Name = "ListBox_TargetCfgs";
-            this.ListBox_TargetCfgs.Size = new System.Drawing.Size(161, 186);
+            this.ListBox_TargetCfgs.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
+            this.ListBox_TargetCfgs.Size = new System.Drawing.Size(161, 172);
             this.ListBox_TargetCfgs.TabIndex = 41;
             this.toolTip1.SetToolTip(this.ListBox_TargetCfgs, "Device Config List");
-            this.ListBox_TargetCfgs.SelectedIndexChanged += new System.EventHandler(this.ListBox_DeviceScanConfig_SelectedIndexChanged);
-            this.ListBox_TargetCfgs.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.ListBox_DeviceScanConfig_MouseDoubleClick);
+            this.ListBox_TargetCfgs.SelectedIndexChanged += new System.EventHandler(this.ListBox_TargetCfgs_SelectedIndexChanged);
+            this.ListBox_TargetCfgs.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.ListBox_TargetCfgs_MouseDoubleClick);
             // 
             // Button_SetActive
             // 
@@ -1252,7 +1294,7 @@ namespace ISC_Win_WinForm_GUI
             // 
             // Button_CfgSave
             // 
-            this.Button_CfgSave.Location = new System.Drawing.Point(234, 544);
+            this.Button_CfgSave.Location = new System.Drawing.Point(236, 544);
             this.Button_CfgSave.Name = "Button_CfgSave";
             this.Button_CfgSave.Size = new System.Drawing.Size(70, 25);
             this.Button_CfgSave.TabIndex = 3;
@@ -1262,7 +1304,7 @@ namespace ISC_Win_WinForm_GUI
             // 
             // Button_CfgDelete
             // 
-            this.Button_CfgDelete.Location = new System.Drawing.Point(158, 544);
+            this.Button_CfgDelete.Location = new System.Drawing.Point(159, 544);
             this.Button_CfgDelete.Name = "Button_CfgDelete";
             this.Button_CfgDelete.Size = new System.Drawing.Size(70, 25);
             this.Button_CfgDelete.TabIndex = 2;
@@ -2860,6 +2902,7 @@ namespace ISC_Win_WinForm_GUI
             this.Label_BleNameValue.Size = new System.Drawing.Size(142, 14);
             this.Label_BleNameValue.TabIndex = 23;
             this.Label_BleNameValue.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.toolTip1.SetToolTip(this.Label_BleNameValue, "Double Click to Copy Text");
             // 
             // Label_Blename
             // 
@@ -2877,6 +2920,7 @@ namespace ISC_Win_WinForm_GUI
             this.label_DevInfoLampUsageValue.Name = "label_DevInfoLampUsageValue";
             this.label_DevInfoLampUsageValue.Size = new System.Drawing.Size(142, 14);
             this.label_DevInfoLampUsageValue.TabIndex = 21;
+            this.toolTip1.SetToolTip(this.label_DevInfoLampUsageValue, "Double Click to Copy Text");
             // 
             // label_DevInfoLampUsage
             // 
@@ -2893,6 +2937,7 @@ namespace ISC_Win_WinForm_GUI
             this.label_DevInfoUUID.Name = "label_DevInfoUUID";
             this.label_DevInfoUUID.Size = new System.Drawing.Size(142, 14);
             this.label_DevInfoUUID.TabIndex = 19;
+            this.toolTip1.SetToolTip(this.label_DevInfoUUID, "Double Click to Copy Text");
             // 
             // label114
             // 
@@ -2909,6 +2954,7 @@ namespace ISC_Win_WinForm_GUI
             this.label_DevInfoManfacSerNum.Name = "label_DevInfoManfacSerNum";
             this.label_DevInfoManfacSerNum.Size = new System.Drawing.Size(142, 14);
             this.label_DevInfoManfacSerNum.TabIndex = 17;
+            this.toolTip1.SetToolTip(this.label_DevInfoManfacSerNum, "Double Click to Copy Text");
             // 
             // label_MFC_Seri_Num
             // 
@@ -2925,6 +2971,7 @@ namespace ISC_Win_WinForm_GUI
             this.label_DevInfoDevSerNum.Name = "label_DevInfoDevSerNum";
             this.label_DevInfoDevSerNum.Size = new System.Drawing.Size(142, 13);
             this.label_DevInfoDevSerNum.TabIndex = 15;
+            this.toolTip1.SetToolTip(this.label_DevInfoDevSerNum, "Double Click to Copy Text");
             // 
             // label104
             // 
@@ -2941,6 +2988,7 @@ namespace ISC_Win_WinForm_GUI
             this.label_DevInfoModelName.Name = "label_DevInfoModelName";
             this.label_DevInfoModelName.Size = new System.Drawing.Size(142, 14);
             this.label_DevInfoModelName.TabIndex = 13;
+            this.toolTip1.SetToolTip(this.label_DevInfoModelName, "Double Click to Copy Text");
             // 
             // label106
             // 
@@ -2957,6 +3005,7 @@ namespace ISC_Win_WinForm_GUI
             this.label_DevInfoDetectorBoardVer.Name = "label_DevInfoDetectorBoardVer";
             this.label_DevInfoDetectorBoardVer.Size = new System.Drawing.Size(142, 14);
             this.label_DevInfoDetectorBoardVer.TabIndex = 11;
+            this.toolTip1.SetToolTip(this.label_DevInfoDetectorBoardVer, "Double Click to Copy Text");
             // 
             // label108
             // 
@@ -2973,6 +3022,7 @@ namespace ISC_Win_WinForm_GUI
             this.label_DevInfoMainBoardVer.Name = "label_DevInfoMainBoardVer";
             this.label_DevInfoMainBoardVer.Size = new System.Drawing.Size(142, 14);
             this.label_DevInfoMainBoardVer.TabIndex = 9;
+            this.toolTip1.SetToolTip(this.label_DevInfoMainBoardVer, "Double Click to Copy Text");
             // 
             // label110
             // 
@@ -2989,6 +3039,7 @@ namespace ISC_Win_WinForm_GUI
             this.label_DevInfoDLPCVer.Name = "label_DevInfoDLPCVer";
             this.label_DevInfoDLPCVer.Size = new System.Drawing.Size(142, 14);
             this.label_DevInfoDLPCVer.TabIndex = 5;
+            this.toolTip1.SetToolTip(this.label_DevInfoDLPCVer, "Double Click to Copy Text");
             // 
             // label102
             // 
@@ -3005,6 +3056,7 @@ namespace ISC_Win_WinForm_GUI
             this.label_DevInfoTivaSWVer.Name = "label_DevInfoTivaSWVer";
             this.label_DevInfoTivaSWVer.Size = new System.Drawing.Size(142, 15);
             this.label_DevInfoTivaSWVer.TabIndex = 3;
+            this.toolTip1.SetToolTip(this.label_DevInfoTivaSWVer, "Double Click to Copy Text");
             // 
             // label98
             // 
@@ -3021,6 +3073,7 @@ namespace ISC_Win_WinForm_GUI
             this.label_DevInfoGUIVer.Name = "label_DevInfoGUIVer";
             this.label_DevInfoGUIVer.Size = new System.Drawing.Size(142, 15);
             this.label_DevInfoGUIVer.TabIndex = 1;
+            this.toolTip1.SetToolTip(this.label_DevInfoGUIVer, "Double Click to Copy Text");
             // 
             // label95
             // 
@@ -3311,6 +3364,7 @@ namespace ISC_Win_WinForm_GUI
             this.Label_SensorLampCM2Value.Name = "Label_SensorLampCM2Value";
             this.Label_SensorLampCM2Value.Size = new System.Drawing.Size(129, 14);
             this.Label_SensorLampCM2Value.TabIndex = 19;
+            this.toolTip1.SetToolTip(this.Label_SensorLampCM2Value, "Double Click to Copy Text");
             // 
             // Label_SensorLampCM1Value
             // 
@@ -3318,6 +3372,7 @@ namespace ISC_Win_WinForm_GUI
             this.Label_SensorLampCM1Value.Name = "Label_SensorLampCM1Value";
             this.Label_SensorLampCM1Value.Size = new System.Drawing.Size(129, 14);
             this.Label_SensorLampCM1Value.TabIndex = 18;
+            this.toolTip1.SetToolTip(this.Label_SensorLampCM1Value, "Double Click to Copy Text");
             // 
             // Label_SensorLampVM2Value
             // 
@@ -3325,6 +3380,7 @@ namespace ISC_Win_WinForm_GUI
             this.Label_SensorLampVM2Value.Name = "Label_SensorLampVM2Value";
             this.Label_SensorLampVM2Value.Size = new System.Drawing.Size(129, 14);
             this.Label_SensorLampVM2Value.TabIndex = 17;
+            this.toolTip1.SetToolTip(this.Label_SensorLampVM2Value, "Double Click to Copy Text");
             // 
             // Label_SensorLampVM1Value
             // 
@@ -3332,6 +3388,7 @@ namespace ISC_Win_WinForm_GUI
             this.Label_SensorLampVM1Value.Name = "Label_SensorLampVM1Value";
             this.Label_SensorLampVM1Value.Size = new System.Drawing.Size(129, 14);
             this.Label_SensorLampVM1Value.TabIndex = 12;
+            this.toolTip1.SetToolTip(this.Label_SensorLampVM1Value, "Double Click to Copy Text");
             // 
             // Label_SensorTivaTemp
             // 
@@ -3339,6 +3396,7 @@ namespace ISC_Win_WinForm_GUI
             this.Label_SensorTivaTemp.Name = "Label_SensorTivaTemp";
             this.Label_SensorTivaTemp.Size = new System.Drawing.Size(129, 14);
             this.Label_SensorTivaTemp.TabIndex = 11;
+            this.toolTip1.SetToolTip(this.Label_SensorTivaTemp, "Double Click to Copy Text");
             // 
             // Label_SensorSysTemp
             // 
@@ -3346,6 +3404,7 @@ namespace ISC_Win_WinForm_GUI
             this.Label_SensorSysTemp.Name = "Label_SensorSysTemp";
             this.Label_SensorSysTemp.Size = new System.Drawing.Size(129, 14);
             this.Label_SensorSysTemp.TabIndex = 10;
+            this.toolTip1.SetToolTip(this.Label_SensorSysTemp, "Double Click to Copy Text");
             // 
             // Label_SensorHumidity
             // 
@@ -3353,6 +3412,7 @@ namespace ISC_Win_WinForm_GUI
             this.Label_SensorHumidity.Name = "Label_SensorHumidity";
             this.Label_SensorHumidity.Size = new System.Drawing.Size(129, 14);
             this.Label_SensorHumidity.TabIndex = 9;
+            this.toolTip1.SetToolTip(this.Label_SensorHumidity, "Double Click to Copy Text");
             // 
             // Label_SensorBattCapacity
             // 
@@ -3360,6 +3420,7 @@ namespace ISC_Win_WinForm_GUI
             this.Label_SensorBattCapacity.Name = "Label_SensorBattCapacity";
             this.Label_SensorBattCapacity.Size = new System.Drawing.Size(129, 14);
             this.Label_SensorBattCapacity.TabIndex = 8;
+            this.toolTip1.SetToolTip(this.Label_SensorBattCapacity, "Double Click to Copy Text");
             // 
             // Label_SensorBattStatus
             // 
@@ -3367,6 +3428,7 @@ namespace ISC_Win_WinForm_GUI
             this.Label_SensorBattStatus.Name = "Label_SensorBattStatus";
             this.Label_SensorBattStatus.Size = new System.Drawing.Size(129, 14);
             this.Label_SensorBattStatus.TabIndex = 7;
+            this.toolTip1.SetToolTip(this.Label_SensorBattStatus, "Double Click to Copy Text");
             // 
             // Label_SensorLampCM2
             // 
@@ -4228,6 +4290,8 @@ namespace ISC_Win_WinForm_GUI
         private Label Label_Blename;
         private Label lb_GUI_Version;
         private Label label12;
+        private Label label16;
+        private Label label15;
     }
 }
 
