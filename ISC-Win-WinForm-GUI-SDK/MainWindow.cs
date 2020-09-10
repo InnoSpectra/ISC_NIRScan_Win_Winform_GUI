@@ -490,7 +490,7 @@ namespace ISC_Win_WinForm_GUI
         }
         private void Connecting_Device(String ModelnSN)
         {
-            ProgressWindowStart("Device Open", "Connecting to the device... Please wait!", false);
+            ProgressWindowStart("Device Open", "Connecting to the device... \r\nPlease Wait!", false);
         }
         private void Device_Connected_Handler(String SerialNumber)
         {
@@ -1094,15 +1094,15 @@ namespace ISC_Win_WinForm_GUI
             else if (ScanButtonPressed)
             {
                 if ((TargetScanCounts - ScannedCounts) == 1)
-                    ProgressWindowStart("Scan Button Pressed", "Scan in progress... Please Wait!", false);
+                    ProgressWindowStart("Scan Button Pressed", "Scan in progress... \r\nPlease Wait!", false);
                 else
-                    ProgressWindowStart("Scan Button Pressed", "Scan in progress... Please Wait!", true);
+                    ProgressWindowStart("Scan Button Pressed", "Continuous scan in progress... \r\nPlease Wait!", true);
                 ScanButtonPressed = false;
             }
             else if (ReferenceSelect == Scan.SCAN_REF_TYPE.SCAN_REF_NEW || (TargetScanCounts - ScannedCounts) == 1)
-                ProgressWindowStart("Scan", "Scan in progress... Please Wait!", false);
+                ProgressWindowStart("Scan", "Scan in progress... \r\nPlease Wait!", false);
             else
-                ProgressWindowStart("Scan", "Scan in progress... Please Wait!", true);
+                ProgressWindowStart("Scan", "Continuous scan in progress... \r\nPlease Wait!", true);
         }
         private void ScanCompleted()
         {
@@ -1238,17 +1238,6 @@ namespace ISC_Win_WinForm_GUI
             label_ActiveConfig.Text = ScanConfig.TargetConfig[TargetCfg_SelIndex].head.config_name;
 
             SetScanConfig(ScanConfig.TargetConfig[TargetCfg_SelIndex], true, TargetCfg_SelIndex);
-            //if (DevCurCfg_IsTarget)
-            //{
-            //    SetScanConfig(ScanConfig.TargetConfig[DevCurCfg_Index], true, DevCurCfg_Index);
-            //}
-            //else
-            //{
-            //    SetScanConfig(LocalConfig[DevCurCfg_Index], false, DevCurCfg_Index);
-            //}
-            //int bufindex = TargetCfg_SelIndex;
-            //RefreshTargetCfgList();
-            //ListBox_TargetCfgs.SelectedIndex = bufindex;
         }
         private void SetScanConfig(ScanConfig.SlewScanConfig Config, Boolean IsTarget, Int32 index)
         {
@@ -3089,7 +3078,6 @@ namespace ISC_Win_WinForm_GUI
 
             if (SaveOneCSVFile)
             {
-                bool fileOpenFailed = false;
                 if (OneScanFileName == String.Empty)
                     OneScanFileName = FileName;
 
@@ -3634,7 +3622,7 @@ namespace ISC_Win_WinForm_GUI
                     bwScan.RunWorkerAsync();
                 else
                 {
-                    String text = "Scanning in progress...\n\nPlease wait!";
+                    String text = "Scanning in progress... \r\nPlease Wait!";
                     MessageBox.Show(text, "Wait");
                 }
                 Label_ContScan.Text = string.Empty;
@@ -5605,10 +5593,6 @@ namespace ISC_Win_WinForm_GUI
                 {
                     ListBox_TargetCfgs.SelectedIndex = EditSelectIndex;
                 }
-                else
-                {
-                    //ListBox_TargetCfgs.SelectedIndex = ListBox_TargetCfgs.Items.Count - 1;
-                }
             }
             else
             {
@@ -6151,6 +6135,8 @@ namespace ISC_Win_WinForm_GUI
         public static event Action RequestPBWClose = null;
         internal static bool SendPBWClose { set { RequestPBWClose(); } }
         private Thread t_PBW;
+        public static event Action<String> RequestPBWContentChange = null;
+        internal static String SendPBWContentChange { set { RequestPBWContentChange(value); } }
 
         private void ProgressWindowStart(String title, String content, Boolean cancellable)
         {
@@ -6166,13 +6152,18 @@ namespace ISC_Win_WinForm_GUI
 
         private void ProgressWindow(String title, String content, Boolean cancellable)
         {
-            try
+            PBW = new ProgressBar(title, content, cancellable) { };
+            PBW.StartPosition = FormStartPosition.CenterScreen;
+            PBW.TopMost = true;
+            Application.Run(PBW);
+        }
+
+        private void ProgressWindowContentUpdate(String newContent)
+        {
+            if (t_PBW != null && t_PBW.IsAlive != false)
             {
-                PBW = new ProgressBar(title, content, cancellable) { };
-                PBW.ShowDialog(this);
-                t_PBW.Abort();
+                SendPBWContentChange = newContent;
             }
-            catch { }
         }
 
         private void ProgressWindowCompleted()
@@ -6180,7 +6171,8 @@ namespace ISC_Win_WinForm_GUI
             SystemBusy(false);
             if (t_PBW != null && t_PBW.IsAlive != false)
             {
-                SendPBWClose = true;
+                t_PBW.Abort();
+                PBW = null;
             }
         }
 
@@ -6702,7 +6694,8 @@ namespace ISC_Win_WinForm_GUI
                 if (enable)
                     SpecificCtrlIgnoreList.Clear();
                 prevSysBusyState = enable;
-                ControlSpecificControls(this, "Button", !enable);
+                //ControlSpecificControls(this, "Button", !enable);
+                ControlAllControls(this, !enable);
             }
             Cursor.Current = enable ? Cursors.WaitCursor : Cursors.Default;  
         }

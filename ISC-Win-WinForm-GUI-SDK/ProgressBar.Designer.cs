@@ -29,20 +29,10 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ProgressBar));
-            this.label_content = new System.Windows.Forms.Label();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.button_cancel = new System.Windows.Forms.Button();
+            this.tb_content = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
-            // 
-            // label_content
-            // 
-            this.label_content.AutoSize = true;
-            this.label_content.Font = new System.Drawing.Font("Calibri", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label_content.Location = new System.Drawing.Point(96, 19);
-            this.label_content.Name = "label_content";
-            this.label_content.Size = new System.Drawing.Size(171, 19);
-            this.label_content.TabIndex = 3;
-            this.label_content.Text = "Start Scan... Please Wait!";
             // 
             // progressBar1
             // 
@@ -64,13 +54,28 @@
             this.button_cancel.UseVisualStyleBackColor = true;
             this.button_cancel.Click += new System.EventHandler(this.button_cancel_Click);
             // 
+            // tb_content
+            // 
+            this.tb_content.BackColor = System.Drawing.SystemColors.Control;
+            this.tb_content.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.tb_content.Font = new System.Drawing.Font("PMingLiU", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.tb_content.Location = new System.Drawing.Point(27, 12);
+            this.tb_content.Multiline = true;
+            this.tb_content.Name = "tb_content";
+            this.tb_content.ReadOnly = true;
+            this.tb_content.Size = new System.Drawing.Size(343, 39);
+            this.tb_content.TabIndex = 5;
+            this.tb_content.TabStop = false;
+            this.tb_content.Text = "Start Scan...\r\nPlease Wait!";
+            this.tb_content.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
             // ProgressBar
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(398, 136);
+            this.Controls.Add(this.tb_content);
             this.Controls.Add(this.button_cancel);
-            this.Controls.Add(this.label_content);
             this.Controls.Add(this.progressBar1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "ProgressBar";
@@ -82,9 +87,8 @@
         }
 
         #endregion
-
-        private System.Windows.Forms.Label label_content;
         private System.Windows.Forms.ProgressBar progressBar1;
         private System.Windows.Forms.Button button_cancel;
+        private System.Windows.Forms.TextBox tb_content;
     }
 }
