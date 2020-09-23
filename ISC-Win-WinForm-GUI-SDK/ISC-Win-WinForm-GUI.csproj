@@ -23,7 +23,7 @@
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>3.5.8.0</ApplicationVersion>
+    <ApplicationVersion>3.6.5.0</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
@@ -75,6 +75,9 @@
     <ApplicationIcon>ISC_Logo.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="isccs">
+      <HintPath>ISC-NIRScan-Library\isccs.dll</HintPath>
+    </Reference>
     <Reference Include="LiveCharts">
       <HintPath>..\packages\LiveCharts.0.9.7\lib\net45\LiveCharts.dll</HintPath>
     </Reference>
@@ -221,22 +224,9 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\Win-SDK-CS-LIB\ISC-Win-CS-Lib\ISC-Win-CS-Lib.csproj">
-      <Project>{f6af7188-4478-463f-b7a4-8ac16c5fb8b6}</Project>
-      <Name>ISC-Win-CS-Lib</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>if $(ConfigurationName)==DeBug goto debug
-if $(ConfigurationName)==Release goto release
-:debug
-copy $(ProjectDir)\ISC-NIRScan-Library\isccpp_d.dll $(TargetDir)
-goto finish
-:release
-copy $(ProjectDir)\ISC-NIRScan-Library\isccpp.dll $(TargetDir)
-goto finish
-:finish</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
 </Project>
