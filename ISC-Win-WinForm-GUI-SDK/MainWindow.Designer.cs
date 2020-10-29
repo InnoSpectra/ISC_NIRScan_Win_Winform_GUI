@@ -37,6 +37,7 @@ namespace ISC_Win_WinForm_GUI
             this.tabControl_MainFunctions = new System.Windows.Forms.TabControl();
             this.tabPage_Scan = new System.Windows.Forms.TabPage();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.button_ExitCont = new System.Windows.Forms.Button();
             this.checkBox_zoom = new System.Windows.Forms.CheckBox();
             this.checkBox_tooltip = new System.Windows.Forms.CheckBox();
             this.Check_Overlay = new System.Windows.Forms.CheckBox();
@@ -64,14 +65,17 @@ namespace ISC_Win_WinForm_GUI
             this.ComboBox_PGAGain = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
             this.GroupBox_SaveScan = new System.Windows.Forms.GroupBox();
+            this.CheckBox_AverageCSV = new System.Windows.Forms.CheckBox();
+            this.label17 = new System.Windows.Forms.Label();
             this.label11 = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
             this.TextBox_FileNamePrefix3 = new System.Windows.Forms.TextBox();
             this.TextBox_FileNamePrefix2 = new System.Windows.Forms.TextBox();
             this.CheckBox_SaveRJDX = new System.Windows.Forms.CheckBox();
+            this.CheckBox_SaveOneCSV = new System.Windows.Forms.CheckBox();
+            this.CheckBox_SaveDAT = new System.Windows.Forms.CheckBox();
             this.CheckBox_SaveAJDX = new System.Windows.Forms.CheckBox();
             this.CheckBox_SaveIJDX = new System.Windows.Forms.CheckBox();
-            this.CheckBox_SaveOneCSV = new System.Windows.Forms.CheckBox();
             this.TextBox_FileNamePrefix1 = new System.Windows.Forms.TextBox();
             this.CheckBox_FileNamePrefix = new System.Windows.Forms.CheckBox();
             this.TextBox_SaveDirPath = new System.Windows.Forms.TextBox();
@@ -79,7 +83,6 @@ namespace ISC_Win_WinForm_GUI
             this.CheckBox_SaveRCSV = new System.Windows.Forms.CheckBox();
             this.CheckBox_SaveACSV = new System.Windows.Forms.CheckBox();
             this.CheckBox_SaveICSV = new System.Windows.Forms.CheckBox();
-            this.CheckBox_SaveDAT = new System.Windows.Forms.CheckBox();
             this.CheckBox_SaveCombCSV = new System.Windows.Forms.CheckBox();
             this.GroupBox_ScanAvg = new System.Windows.Forms.GroupBox();
             this.textBox_ScanAvg = new System.Windows.Forms.TextBox();
@@ -176,6 +179,7 @@ namespace ISC_Win_WinForm_GUI
             this.label80 = new System.Windows.Forms.Label();
             this.tabPage_SaveScans = new System.Windows.Forms.TabPage();
             this.panel_Saved_Scan = new System.Windows.Forms.Panel();
+            this.totalScan = new System.Windows.Forms.Label();
             this.button_clear = new System.Windows.Forms.Button();
             this.textBox_filter = new System.Windows.Forms.TextBox();
             this.label13 = new System.Windows.Forms.Label();
@@ -439,12 +443,15 @@ namespace ISC_Win_WinForm_GUI
             // 
             // splitContainer1
             // 
-            this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.splitContainer1.Location = new System.Drawing.Point(3, 3);
             this.splitContainer1.Name = "splitContainer1";
             // 
             // splitContainer1.Panel1
             // 
+            this.splitContainer1.Panel1.Controls.Add(this.button_ExitCont);
             this.splitContainer1.Panel1.Controls.Add(this.checkBox_zoom);
             this.splitContainer1.Panel1.Controls.Add(this.checkBox_tooltip);
             this.splitContainer1.Panel1.Controls.Add(this.Check_Overlay);
@@ -457,16 +464,31 @@ namespace ISC_Win_WinForm_GUI
             this.splitContainer1.Panel1.Controls.Add(this.Label_CurrentConfig);
             this.splitContainer1.Panel1.Controls.Add(this.Label_ScanStatus);
             this.splitContainer1.Panel1.Controls.Add(this.MyChart);
+            this.splitContainer1.Panel1MinSize = 845;
             // 
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.tabScanPage);
+            this.splitContainer1.Panel2MinSize = 400;
             this.splitContainer1.Size = new System.Drawing.Size(1250, 627);
             this.splitContainer1.SplitterDistance = 845;
             this.splitContainer1.TabIndex = 0;
             // 
+            // button_ExitCont
+            // 
+            this.button_ExitCont.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_ExitCont.Location = new System.Drawing.Point(593, 569);
+            this.button_ExitCont.Name = "button_ExitCont";
+            this.button_ExitCont.Size = new System.Drawing.Size(75, 23);
+            this.button_ExitCont.TabIndex = 15;
+            this.button_ExitCont.Text = "Exit";
+            this.button_ExitCont.UseVisualStyleBackColor = true;
+            this.button_ExitCont.Visible = false;
+            this.button_ExitCont.Click += new System.EventHandler(this.button_ExitCont_Click);
+            // 
             // checkBox_zoom
             // 
+            this.checkBox_zoom.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.checkBox_zoom.AutoSize = true;
             this.checkBox_zoom.Location = new System.Drawing.Point(546, 597);
             this.checkBox_zoom.Name = "checkBox_zoom";
@@ -479,6 +501,7 @@ namespace ISC_Win_WinForm_GUI
             // 
             // checkBox_tooltip
             // 
+            this.checkBox_tooltip.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.checkBox_tooltip.AutoSize = true;
             this.checkBox_tooltip.Location = new System.Drawing.Point(472, 598);
             this.checkBox_tooltip.Name = "checkBox_tooltip";
@@ -491,7 +514,7 @@ namespace ISC_Win_WinForm_GUI
             // 
             // Check_Overlay
             // 
-            this.Check_Overlay.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.Check_Overlay.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.Check_Overlay.AutoSize = true;
             this.Check_Overlay.Location = new System.Drawing.Point(472, 574);
             this.Check_Overlay.Name = "Check_Overlay";
@@ -515,7 +538,7 @@ namespace ISC_Win_WinForm_GUI
             // 
             // RadioButton_Reference
             // 
-            this.RadioButton_Reference.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.RadioButton_Reference.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.RadioButton_Reference.AutoSize = true;
             this.RadioButton_Reference.Location = new System.Drawing.Point(359, 574);
             this.RadioButton_Reference.Name = "RadioButton_Reference";
@@ -527,7 +550,7 @@ namespace ISC_Win_WinForm_GUI
             // 
             // RadioButton_Intensity
             // 
-            this.RadioButton_Intensity.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.RadioButton_Intensity.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.RadioButton_Intensity.AutoSize = true;
             this.RadioButton_Intensity.Location = new System.Drawing.Point(256, 573);
             this.RadioButton_Intensity.Name = "RadioButton_Intensity";
@@ -539,7 +562,7 @@ namespace ISC_Win_WinForm_GUI
             // 
             // RadioButton_Absorbance
             // 
-            this.RadioButton_Absorbance.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.RadioButton_Absorbance.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.RadioButton_Absorbance.AutoSize = true;
             this.RadioButton_Absorbance.Location = new System.Drawing.Point(138, 573);
             this.RadioButton_Absorbance.Name = "RadioButton_Absorbance";
@@ -551,7 +574,7 @@ namespace ISC_Win_WinForm_GUI
             // 
             // RadioButton_Reflectance
             // 
-            this.RadioButton_Reflectance.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.RadioButton_Reflectance.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.RadioButton_Reflectance.AutoSize = true;
             this.RadioButton_Reflectance.Location = new System.Drawing.Point(23, 573);
             this.RadioButton_Reflectance.Name = "RadioButton_Reflectance";
@@ -563,6 +586,7 @@ namespace ISC_Win_WinForm_GUI
             // 
             // Label_EstimatedScanTime
             // 
+            this.Label_EstimatedScanTime.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.Label_EstimatedScanTime.Location = new System.Drawing.Point(574, 14);
             this.Label_EstimatedScanTime.Name = "Label_EstimatedScanTime";
             this.Label_EstimatedScanTime.Size = new System.Drawing.Size(252, 27);
@@ -570,6 +594,7 @@ namespace ISC_Win_WinForm_GUI
             // 
             // Label_CurrentConfig
             // 
+            this.Label_CurrentConfig.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.Label_CurrentConfig.Location = new System.Drawing.Point(315, 14);
             this.Label_CurrentConfig.Name = "Label_CurrentConfig";
             this.Label_CurrentConfig.Size = new System.Drawing.Size(235, 27);
@@ -592,7 +617,7 @@ namespace ISC_Win_WinForm_GUI
             this.MyChart.Cursor = System.Windows.Forms.Cursors.Hand;
             this.MyChart.Location = new System.Drawing.Point(23, 68);
             this.MyChart.Name = "MyChart";
-            this.MyChart.Size = new System.Drawing.Size(792, 485);
+            this.MyChart.Size = new System.Drawing.Size(749, 485);
             this.MyChart.TabIndex = 0;
             this.MyChart.Text = "cartesianChart1";
             // 
@@ -767,14 +792,17 @@ namespace ISC_Win_WinForm_GUI
             // 
             // GroupBox_SaveScan
             // 
+            this.GroupBox_SaveScan.Controls.Add(this.CheckBox_AverageCSV);
+            this.GroupBox_SaveScan.Controls.Add(this.label17);
             this.GroupBox_SaveScan.Controls.Add(this.label11);
             this.GroupBox_SaveScan.Controls.Add(this.label10);
             this.GroupBox_SaveScan.Controls.Add(this.TextBox_FileNamePrefix3);
             this.GroupBox_SaveScan.Controls.Add(this.TextBox_FileNamePrefix2);
             this.GroupBox_SaveScan.Controls.Add(this.CheckBox_SaveRJDX);
+            this.GroupBox_SaveScan.Controls.Add(this.CheckBox_SaveOneCSV);
+            this.GroupBox_SaveScan.Controls.Add(this.CheckBox_SaveDAT);
             this.GroupBox_SaveScan.Controls.Add(this.CheckBox_SaveAJDX);
             this.GroupBox_SaveScan.Controls.Add(this.CheckBox_SaveIJDX);
-            this.GroupBox_SaveScan.Controls.Add(this.CheckBox_SaveOneCSV);
             this.GroupBox_SaveScan.Controls.Add(this.TextBox_FileNamePrefix1);
             this.GroupBox_SaveScan.Controls.Add(this.CheckBox_FileNamePrefix);
             this.GroupBox_SaveScan.Controls.Add(this.TextBox_SaveDirPath);
@@ -782,7 +810,6 @@ namespace ISC_Win_WinForm_GUI
             this.GroupBox_SaveScan.Controls.Add(this.CheckBox_SaveRCSV);
             this.GroupBox_SaveScan.Controls.Add(this.CheckBox_SaveACSV);
             this.GroupBox_SaveScan.Controls.Add(this.CheckBox_SaveICSV);
-            this.GroupBox_SaveScan.Controls.Add(this.CheckBox_SaveDAT);
             this.GroupBox_SaveScan.Controls.Add(this.CheckBox_SaveCombCSV);
             this.GroupBox_SaveScan.Location = new System.Drawing.Point(3, 373);
             this.GroupBox_SaveScan.Name = "GroupBox_SaveScan";
@@ -790,6 +817,25 @@ namespace ISC_Win_WinForm_GUI
             this.GroupBox_SaveScan.TabIndex = 6;
             this.GroupBox_SaveScan.TabStop = false;
             this.GroupBox_SaveScan.Text = "Save Scan As";
+            // 
+            // CheckBox_AverageCSV
+            // 
+            this.CheckBox_AverageCSV.AutoSize = true;
+            this.CheckBox_AverageCSV.Location = new System.Drawing.Point(205, 16);
+            this.CheckBox_AverageCSV.Name = "CheckBox_AverageCSV";
+            this.CheckBox_AverageCSV.Size = new System.Drawing.Size(92, 18);
+            this.CheckBox_AverageCSV.TabIndex = 21;
+            this.CheckBox_AverageCSV.Text = "-average.csv";
+            this.CheckBox_AverageCSV.UseVisualStyleBackColor = true;
+            // 
+            // label17
+            // 
+            this.label17.AutoSize = true;
+            this.label17.Location = new System.Drawing.Point(41, 64);
+            this.label17.Name = "label17";
+            this.label17.Size = new System.Drawing.Size(25, 14);
+            this.label17.TabIndex = 20;
+            this.label17.Text = ".jdx";
             // 
             // label11
             // 
@@ -830,43 +876,19 @@ namespace ISC_Win_WinForm_GUI
             // CheckBox_SaveRJDX
             // 
             this.CheckBox_SaveRJDX.AutoSize = true;
-            this.CheckBox_SaveRJDX.Location = new System.Drawing.Point(250, 65);
+            this.CheckBox_SaveRJDX.Location = new System.Drawing.Point(268, 64);
             this.CheckBox_SaveRJDX.Name = "CheckBox_SaveRJDX";
-            this.CheckBox_SaveRJDX.Size = new System.Drawing.Size(107, 18);
+            this.CheckBox_SaveRJDX.Size = new System.Drawing.Size(89, 18);
             this.CheckBox_SaveRJDX.TabIndex = 8;
             this.CheckBox_SaveRJDX.TabStop = false;
-            this.CheckBox_SaveRJDX.Text = "-reflectance.jdx";
+            this.CheckBox_SaveRJDX.Text = "-reflectance";
             this.CheckBox_SaveRJDX.UseVisualStyleBackColor = true;
             this.CheckBox_SaveRJDX.CheckedChanged += new System.EventHandler(this.CheckBox_SaveFileFormat_Click);
-            // 
-            // CheckBox_SaveAJDX
-            // 
-            this.CheckBox_SaveAJDX.AutoSize = true;
-            this.CheckBox_SaveAJDX.Location = new System.Drawing.Point(250, 43);
-            this.CheckBox_SaveAJDX.Name = "CheckBox_SaveAJDX";
-            this.CheckBox_SaveAJDX.Size = new System.Drawing.Size(112, 18);
-            this.CheckBox_SaveAJDX.TabIndex = 7;
-            this.CheckBox_SaveAJDX.TabStop = false;
-            this.CheckBox_SaveAJDX.Text = "-absorbance.jdx";
-            this.CheckBox_SaveAJDX.UseVisualStyleBackColor = true;
-            this.CheckBox_SaveAJDX.CheckedChanged += new System.EventHandler(this.CheckBox_SaveFileFormat_Click);
-            // 
-            // CheckBox_SaveIJDX
-            // 
-            this.CheckBox_SaveIJDX.AutoSize = true;
-            this.CheckBox_SaveIJDX.Location = new System.Drawing.Point(250, 21);
-            this.CheckBox_SaveIJDX.Name = "CheckBox_SaveIJDX";
-            this.CheckBox_SaveIJDX.Size = new System.Drawing.Size(95, 18);
-            this.CheckBox_SaveIJDX.TabIndex = 6;
-            this.CheckBox_SaveIJDX.TabStop = false;
-            this.CheckBox_SaveIJDX.Text = "-intensity.jdx";
-            this.CheckBox_SaveIJDX.UseVisualStyleBackColor = true;
-            this.CheckBox_SaveIJDX.CheckedChanged += new System.EventHandler(this.CheckBox_SaveFileFormat_Click);
             // 
             // CheckBox_SaveOneCSV
             // 
             this.CheckBox_SaveOneCSV.AutoSize = true;
-            this.CheckBox_SaveOneCSV.Location = new System.Drawing.Point(20, 67);
+            this.CheckBox_SaveOneCSV.Location = new System.Drawing.Point(88, 16);
             this.CheckBox_SaveOneCSV.Name = "CheckBox_SaveOneCSV";
             this.CheckBox_SaveOneCSV.Size = new System.Drawing.Size(103, 18);
             this.CheckBox_SaveOneCSV.TabIndex = 2;
@@ -874,6 +896,44 @@ namespace ISC_Win_WinForm_GUI
             this.CheckBox_SaveOneCSV.Text = "-combined.csv";
             this.CheckBox_SaveOneCSV.UseVisualStyleBackColor = true;
             this.CheckBox_SaveOneCSV.CheckedChanged += new System.EventHandler(this.CheckBox_SaveFileFormat_Click);
+            // 
+            // CheckBox_SaveDAT
+            // 
+            this.CheckBox_SaveDAT.AutoSize = true;
+            this.CheckBox_SaveDAT.Checked = true;
+            this.CheckBox_SaveDAT.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.CheckBox_SaveDAT.Location = new System.Drawing.Point(20, 16);
+            this.CheckBox_SaveDAT.Name = "CheckBox_SaveDAT";
+            this.CheckBox_SaveDAT.Size = new System.Drawing.Size(53, 18);
+            this.CheckBox_SaveDAT.TabIndex = 1;
+            this.CheckBox_SaveDAT.TabStop = false;
+            this.CheckBox_SaveDAT.Text = "*.dat";
+            this.CheckBox_SaveDAT.UseVisualStyleBackColor = true;
+            this.CheckBox_SaveDAT.CheckedChanged += new System.EventHandler(this.CheckBox_SaveFileFormat_Click);
+            // 
+            // CheckBox_SaveAJDX
+            // 
+            this.CheckBox_SaveAJDX.AutoSize = true;
+            this.CheckBox_SaveAJDX.Location = new System.Drawing.Point(171, 64);
+            this.CheckBox_SaveAJDX.Name = "CheckBox_SaveAJDX";
+            this.CheckBox_SaveAJDX.Size = new System.Drawing.Size(94, 18);
+            this.CheckBox_SaveAJDX.TabIndex = 7;
+            this.CheckBox_SaveAJDX.TabStop = false;
+            this.CheckBox_SaveAJDX.Text = "-absorbance";
+            this.CheckBox_SaveAJDX.UseVisualStyleBackColor = true;
+            this.CheckBox_SaveAJDX.CheckedChanged += new System.EventHandler(this.CheckBox_SaveFileFormat_Click);
+            // 
+            // CheckBox_SaveIJDX
+            // 
+            this.CheckBox_SaveIJDX.AutoSize = true;
+            this.CheckBox_SaveIJDX.Location = new System.Drawing.Point(88, 64);
+            this.CheckBox_SaveIJDX.Name = "CheckBox_SaveIJDX";
+            this.CheckBox_SaveIJDX.Size = new System.Drawing.Size(78, 18);
+            this.CheckBox_SaveIJDX.TabIndex = 6;
+            this.CheckBox_SaveIJDX.TabStop = false;
+            this.CheckBox_SaveIJDX.Text = "-intensity";
+            this.CheckBox_SaveIJDX.UseVisualStyleBackColor = true;
+            this.CheckBox_SaveIJDX.CheckedChanged += new System.EventHandler(this.CheckBox_SaveFileFormat_Click);
             // 
             // TextBox_FileNamePrefix1
             // 
@@ -918,59 +978,45 @@ namespace ISC_Win_WinForm_GUI
             // CheckBox_SaveRCSV
             // 
             this.CheckBox_SaveRCSV.AutoSize = true;
-            this.CheckBox_SaveRCSV.Location = new System.Drawing.Point(124, 65);
+            this.CheckBox_SaveRCSV.Location = new System.Drawing.Point(268, 40);
             this.CheckBox_SaveRCSV.Name = "CheckBox_SaveRCSV";
-            this.CheckBox_SaveRCSV.Size = new System.Drawing.Size(108, 18);
+            this.CheckBox_SaveRCSV.Size = new System.Drawing.Size(89, 18);
             this.CheckBox_SaveRCSV.TabIndex = 5;
             this.CheckBox_SaveRCSV.TabStop = false;
-            this.CheckBox_SaveRCSV.Text = "-reflectance.csv";
+            this.CheckBox_SaveRCSV.Text = "-reflectance";
             this.CheckBox_SaveRCSV.UseVisualStyleBackColor = true;
             this.CheckBox_SaveRCSV.CheckedChanged += new System.EventHandler(this.CheckBox_SaveFileFormat_Click);
             // 
             // CheckBox_SaveACSV
             // 
             this.CheckBox_SaveACSV.AutoSize = true;
-            this.CheckBox_SaveACSV.Location = new System.Drawing.Point(124, 43);
+            this.CheckBox_SaveACSV.Location = new System.Drawing.Point(171, 40);
             this.CheckBox_SaveACSV.Name = "CheckBox_SaveACSV";
-            this.CheckBox_SaveACSV.Size = new System.Drawing.Size(113, 18);
+            this.CheckBox_SaveACSV.Size = new System.Drawing.Size(94, 18);
             this.CheckBox_SaveACSV.TabIndex = 4;
             this.CheckBox_SaveACSV.TabStop = false;
-            this.CheckBox_SaveACSV.Text = "-absorbance.csv";
+            this.CheckBox_SaveACSV.Text = "-absorbance";
             this.CheckBox_SaveACSV.UseVisualStyleBackColor = true;
             this.CheckBox_SaveACSV.CheckedChanged += new System.EventHandler(this.CheckBox_SaveFileFormat_Click);
             // 
             // CheckBox_SaveICSV
             // 
             this.CheckBox_SaveICSV.AutoSize = true;
-            this.CheckBox_SaveICSV.Location = new System.Drawing.Point(124, 21);
+            this.CheckBox_SaveICSV.Location = new System.Drawing.Point(88, 40);
             this.CheckBox_SaveICSV.Name = "CheckBox_SaveICSV";
-            this.CheckBox_SaveICSV.Size = new System.Drawing.Size(96, 18);
+            this.CheckBox_SaveICSV.Size = new System.Drawing.Size(78, 18);
             this.CheckBox_SaveICSV.TabIndex = 3;
             this.CheckBox_SaveICSV.TabStop = false;
-            this.CheckBox_SaveICSV.Text = "-intensity.csv";
+            this.CheckBox_SaveICSV.Text = "-intensity";
             this.CheckBox_SaveICSV.UseVisualStyleBackColor = true;
             this.CheckBox_SaveICSV.CheckedChanged += new System.EventHandler(this.CheckBox_SaveFileFormat_Click);
-            // 
-            // CheckBox_SaveDAT
-            // 
-            this.CheckBox_SaveDAT.AutoSize = true;
-            this.CheckBox_SaveDAT.Checked = true;
-            this.CheckBox_SaveDAT.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.CheckBox_SaveDAT.Location = new System.Drawing.Point(20, 43);
-            this.CheckBox_SaveDAT.Name = "CheckBox_SaveDAT";
-            this.CheckBox_SaveDAT.Size = new System.Drawing.Size(53, 18);
-            this.CheckBox_SaveDAT.TabIndex = 1;
-            this.CheckBox_SaveDAT.TabStop = false;
-            this.CheckBox_SaveDAT.Text = "*.dat";
-            this.CheckBox_SaveDAT.UseVisualStyleBackColor = true;
-            this.CheckBox_SaveDAT.CheckedChanged += new System.EventHandler(this.CheckBox_SaveFileFormat_Click);
             // 
             // CheckBox_SaveCombCSV
             // 
             this.CheckBox_SaveCombCSV.AutoSize = true;
             this.CheckBox_SaveCombCSV.Checked = true;
             this.CheckBox_SaveCombCSV.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.CheckBox_SaveCombCSV.Location = new System.Drawing.Point(20, 21);
+            this.CheckBox_SaveCombCSV.Location = new System.Drawing.Point(20, 40);
             this.CheckBox_SaveCombCSV.Name = "CheckBox_SaveCombCSV";
             this.CheckBox_SaveCombCSV.Size = new System.Drawing.Size(51, 18);
             this.CheckBox_SaveCombCSV.TabIndex = 0;
@@ -2105,6 +2151,7 @@ namespace ISC_Win_WinForm_GUI
             // 
             // panel_Saved_Scan
             // 
+            this.panel_Saved_Scan.Controls.Add(this.totalScan);
             this.panel_Saved_Scan.Controls.Add(this.button_clear);
             this.panel_Saved_Scan.Controls.Add(this.textBox_filter);
             this.panel_Saved_Scan.Controls.Add(this.label13);
@@ -2163,6 +2210,15 @@ namespace ISC_Win_WinForm_GUI
             this.panel_Saved_Scan.Size = new System.Drawing.Size(392, 584);
             this.panel_Saved_Scan.TabIndex = 0;
             // 
+            // totalScan
+            // 
+            this.totalScan.AutoSize = true;
+            this.totalScan.Location = new System.Drawing.Point(312, 357);
+            this.totalScan.Name = "totalScan";
+            this.totalScan.Size = new System.Drawing.Size(40, 14);
+            this.totalScan.TabIndex = 107;
+            this.totalScan.Text = "Total: ";
+            // 
             // button_clear
             // 
             this.button_clear.Location = new System.Drawing.Point(315, 43);
@@ -2202,6 +2258,7 @@ namespace ISC_Win_WinForm_GUI
             this.dataGridView_savescan.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dataGridView_savescan.Size = new System.Drawing.Size(386, 278);
             this.dataGridView_savescan.TabIndex = 6;
+            this.dataGridView_savescan.Scroll += new System.Windows.Forms.ScrollEventHandler(this.dataGridView_savescan_Scroll);
             this.dataGridView_savescan.KeyDown += new System.Windows.Forms.KeyEventHandler(this.dataGridView_savescan_KeyDown);
             this.dataGridView_savescan.MouseClick += new System.Windows.Forms.MouseEventHandler(this.dataGridView_savescan_MouseClick);
             // 
@@ -3899,8 +3956,10 @@ namespace ISC_Win_WinForm_GUI
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.MaximizeBox = false;
+            this.MinimumSize = new System.Drawing.Size(920, 721);
             this.Name = "MainWindow";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.SizeChanged += new System.EventHandler(this.MainWindow_SizeChanged);
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
             this.tabControl_MainFunctions.ResumeLayout(false);
@@ -4292,6 +4351,10 @@ namespace ISC_Win_WinForm_GUI
         private Label label12;
         private Label label16;
         private Label label15;
+        private Label totalScan;
+        private CheckBox CheckBox_AverageCSV;
+        private Label label17;
+        private Button button_ExitCont;
     }
 }
 

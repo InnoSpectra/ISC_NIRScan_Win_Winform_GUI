@@ -3,7 +3,7 @@
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Platform Condition=" '$(Platform)' == '' ">x64</Platform>
     <ProjectGuid>{40AFD57C-9180-4070-BCF3-FF08C67F348E}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <RootNamespace>ISC_Win_WinForm_GUI</RootNamespace>
@@ -23,46 +23,49 @@
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>3.6.5.0</ApplicationVersion>
+    <ApplicationVersion>3.5.8.0</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+    <PlatformTarget>x64</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <OutputPath>..\Debug\x64\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;x64</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <LangVersion>7.2</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
+    <PlatformTarget>x64</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <OutputPath>..\Release\x64\</OutputPath>
+    <DefineConstants>TRACE;x64</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <LangVersion>7</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\x86\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <OutputPath>..\Debug\x86\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;x86</DefineConstants>
     <DebugType>full</DebugType>
     <PlatformTarget>x86</PlatformTarget>
     <LangVersion>7.2</LangVersion>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>true</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
-    <OutputPath>..\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <OutputPath>..\Release\x86\</OutputPath>
+    <DefineConstants>TRACE;x86</DefineConstants>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>x86</PlatformTarget>
@@ -70,6 +73,7 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>true</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>ISC_Logo.ico</ApplicationIcon>
@@ -177,38 +181,6 @@
     <Content Include="Images\Led_Gray.png" />
     <Content Include="Images\Led_R.png" />
     <None Include="Resources\Release Notes.txt" />
-    <ContentWithTargetPath Include="ISC-NIRScan-Library\hidapi.dll">
-      <TargetPath>hidapi.dll</TargetPath>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </ContentWithTargetPath>
-    <ContentWithTargetPath Include="ISC-NIRScan-Library\isccpp.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <TargetPath>isccpp.dll</TargetPath>
-    </ContentWithTargetPath>
-    <ContentWithTargetPath Include="ISC-NIRScan-Library\isccs.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <TargetPath>isccs.dll</TargetPath>
-    </ContentWithTargetPath>
-    <ContentWithTargetPath Include="ISC-NIRScan-Library\libdlpspec.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <TargetPath>libdlpspec.dll</TargetPath>
-    </ContentWithTargetPath>
-    <ContentWithTargetPath Include="ISC-NIRScan-Library\msvcp140.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <TargetPath>msvcp140.dll</TargetPath>
-    </ContentWithTargetPath>
-    <ContentWithTargetPath Include="ISC-NIRScan-Library\vcruntime140.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <TargetPath>vcruntime140.dll</TargetPath>
-    </ContentWithTargetPath>
-    <ContentWithTargetPath Include="ISC-NIRScan-Library\lmdfu.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <TargetPath>lmdfu.dll</TargetPath>
-    </ContentWithTargetPath>
-    <ContentWithTargetPath Include="ISC-NIRScan-Library\lmusbdll.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <TargetPath>lmusbdll.dll</TargetPath>
-    </ContentWithTargetPath>
     <None Include="Images\warning.png" />
     <Content Include="ISC_Logo.ico" />
   </ItemGroup>
@@ -226,7 +198,25 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
+    <PostBuildEvent>if "$(DefineConstants.Contains('x64'))" == "True" (
+copy $(ProjectDir)\ISC-NIRScan-Library\x64\isccs.dll $(TargetDir)
+copy $(ProjectDir)\ISC-NIRScan-Library\x64\isccpp.dll $(TargetDir)
+copy $(ProjectDir)\ISC-NIRScan-Library\x64\libdlpspec.dll $(TargetDir)
+copy $(ProjectDir)\ISC-NIRScan-Library\x64\hidapi.dll $(TargetDir)
+copy $(ProjectDir)\ISC-NIRScan-Library\x64\lmdfu.dll $(TargetDir)
+copy $(ProjectDir)\ISC-NIRScan-Library\x64\lmusbdll.dll $(TargetDir)
+copy $(ProjectDir)\ISC-NIRScan-Library\x64\msvcp140.dll $(TargetDir)
+copy $(ProjectDir)\ISC-NIRScan-Library\x64\vcruntime140.dll $(TargetDir)
+) else (
+copy $(ProjectDir)\ISC-NIRScan-Library\isccs.dll $(TargetDir)
+copy $(ProjectDir)\ISC-NIRScan-Library\isccpp.dll $(TargetDir)
+copy $(ProjectDir)\ISC-NIRScan-Library\libdlpspec.dll $(TargetDir)
+copy $(ProjectDir)\ISC-NIRScan-Library\hidapi.dll $(TargetDir)
+copy $(ProjectDir)\ISC-NIRScan-Library\lmdfu.dll $(TargetDir)
+copy $(ProjectDir)\ISC-NIRScan-Library\lmusbdll.dll $(TargetDir)
+copy $(ProjectDir)\ISC-NIRScan-Library\msvcp140.dll $(TargetDir)
+copy $(ProjectDir)\ISC-NIRScan-Library\vcruntime140.dll $(TargetDir)
+)
+</PostBuildEvent>
   </PropertyGroup>
 </Project>
