@@ -3261,16 +3261,6 @@ namespace ISC_Win_WinForm_GUI
                     sw.WriteLine(Scan.WaveLength[i] + "," + Scan.Absorbance[i]);
                 }
 
-                string sWav = Encoding.ASCII.GetString(bWav);
-                string sAbs = Encoding.ASCII.GetString(bAbs);
-                
-                sw.WriteLine("\n");
-                sw.WriteLine("Wav," + WebUtility.UrlEncode(sWav));
-                sw.WriteLine("Abs," + WebUtility.UrlEncode(sAbs));
-                sw.WriteLine("\n");
-                sw.WriteLine("Wav," + Uri.EscapeDataString(sWav));
-                sw.WriteLine("Abs," + Uri.EscapeDataString(sAbs));
-
                 sw.Flush();  // Clear buffer
                 sw.Close();  // Close file stream
             }
