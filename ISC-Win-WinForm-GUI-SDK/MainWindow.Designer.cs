@@ -362,6 +362,7 @@ namespace ISC_Win_WinForm_GUI
             this.label_license_agree = new System.Windows.Forms.Label();
             this.label_ErrorStatus = new System.Windows.Forms.Label();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.statusStrip1.SuspendLayout();
             this.tabControl_MainFunctions.SuspendLayout();
             this.tabPage_Scan.SuspendLayout();
@@ -726,6 +727,7 @@ namespace ISC_Win_WinForm_GUI
             this.label2.Size = new System.Drawing.Size(65, 14);
             this.label2.TabIndex = 10;
             this.label2.Text = "Cont. Scan:";
+            this.label2.DoubleClick += new System.EventHandler(this.label2_DoubleClick);
             // 
             // Text_ContScan
             // 
@@ -3943,6 +3945,11 @@ namespace ISC_Win_WinForm_GUI
             this.label_ErrorStatus.Size = new System.Drawing.Size(0, 14);
             this.label_ErrorStatus.TabIndex = 3;
             // 
+            // timer1
+            // 
+            this.timer1.Interval = 8000;
+            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
+            // 
             // MainWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 14F);
@@ -4355,6 +4362,7 @@ namespace ISC_Win_WinForm_GUI
         private CheckBox CheckBox_AverageCSV;
         private Label label17;
         private Button button_ExitCont;
+        private Timer timer1;
     }
 }
 
