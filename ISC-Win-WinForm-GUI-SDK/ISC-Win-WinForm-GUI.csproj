@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -199,23 +199,9 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>if "$(DefineConstants.Contains('x64'))" == "True" (
-copy $(ProjectDir)\ISC-NIRScan-Library\x64\isccs.dll $(TargetDir)
-copy $(ProjectDir)\ISC-NIRScan-Library\x64\isccpp.dll $(TargetDir)
-copy $(ProjectDir)\ISC-NIRScan-Library\x64\libdlpspec.dll $(TargetDir)
-copy $(ProjectDir)\ISC-NIRScan-Library\x64\hidapi.dll $(TargetDir)
-copy $(ProjectDir)\ISC-NIRScan-Library\x64\lmdfu.dll $(TargetDir)
-copy $(ProjectDir)\ISC-NIRScan-Library\x64\lmusbdll.dll $(TargetDir)
-copy $(ProjectDir)\ISC-NIRScan-Library\x64\msvcp140.dll $(TargetDir)
-copy $(ProjectDir)\ISC-NIRScan-Library\x64\vcruntime140.dll $(TargetDir)
+copy $(ProjectDir)\ISC-NIRScan-Library\x64\*.* $(TargetDir)
 ) else (
-copy $(ProjectDir)\ISC-NIRScan-Library\isccs.dll $(TargetDir)
-copy $(ProjectDir)\ISC-NIRScan-Library\isccpp.dll $(TargetDir)
-copy $(ProjectDir)\ISC-NIRScan-Library\libdlpspec.dll $(TargetDir)
-copy $(ProjectDir)\ISC-NIRScan-Library\hidapi.dll $(TargetDir)
-copy $(ProjectDir)\ISC-NIRScan-Library\lmdfu.dll $(TargetDir)
-copy $(ProjectDir)\ISC-NIRScan-Library\lmusbdll.dll $(TargetDir)
-copy $(ProjectDir)\ISC-NIRScan-Library\msvcp140.dll $(TargetDir)
-copy $(ProjectDir)\ISC-NIRScan-Library\vcruntime140.dll $(TargetDir)
+copy $(ProjectDir)\ISC-NIRScan-Library\*.* $(TargetDir)
 )
 </PostBuildEvent>
   </PropertyGroup>

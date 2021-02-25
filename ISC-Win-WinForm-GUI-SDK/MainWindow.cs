@@ -159,7 +159,6 @@ namespace ISC_Win_WinForm_GUI
             Label_CurrentConfig.ForeColor = System.Drawing.Color.OrangeRed;
             Label_CurrentConfig.Font = new System.Drawing.Font(Label_CurrentConfig.Font, System.Drawing.FontStyle.Bold);
             MainWindow_Loaded();
-
             // Load save scan 
             LoadSavedScanList();
             CheckScanDirPath();
@@ -3281,35 +3280,76 @@ namespace ISC_Win_WinForm_GUI
                     byte[] HW_Ver = Encoding.ASCII.GetBytes(Device.DevInfo.HardwareRev);
                     int MB_Ver = HW_Ver[0];
 
-                    if (MB_Ver > 'E' && MB_Ver != 'N' && !(Device.DevInfo.ModelType == 'F'))
+                    if (MB_Ver > 'E' && MB_Ver != 'N' && !(Device.DevInfo.ModelType == 'F') && !RadioButton_LampOff.Checked)
                     {
                         Device.ReadLampAdcTimeStamp();
                         Device.ReadLampRampUpData();
                         sw.WriteLine("\n***Lamp Ramp Up ADC***");
                         if (Device.DevInfo.ModelType == 'R')
-                            sw.WriteLine("Timestamp(ms),ADC0,ADC1,ADC2,ADC3");
+                        {
+                            if (Device.DevInfo.TivaRev[0] >= 2 && Device.DevInfo.TivaRev[1] >= 5)
+                                sw.WriteLine("Timestamp(ms),ADC0,ADC1,ADC2,ADC3");
+                            else
+                                sw.WriteLine("ADC0,ADC1,ADC2,ADC3");
+                        }
                         else
-                            sw.WriteLine("Timestamp(ms),ADC");
+                        {
+                            if (Device.DevInfo.TivaRev[0] >= 2 && Device.DevInfo.TivaRev[1] >= 5)
+                                sw.WriteLine("Timestamp(ms),ADC");
+                            else
+                                sw.WriteLine("ADC");
+                        }
                         for (int i = 0; i < Device.MAX_LAMP_RAMP_UP_ADC_SIZE / 4 && Device.LampRampUpADC[i * 4] != 0; i++)
                         {
                             if (Device.DevInfo.ModelType == 'R')
-                                sw.WriteLine(Device.LampAdcTimeStamp[i] + "," + Device.LampRampUpADC[i * 4] + "," + Device.LampRampUpADC[i * 4 + 1] + "," + Device.LampRampUpADC[i * 4 + 2] + "," + Device.LampRampUpADC[i * 4 + 3]);
+                            {
+                                if (Device.DevInfo.TivaRev[0] >= 2 && Device.DevInfo.TivaRev[1] >= 5)
+                                    sw.WriteLine(Device.LampAdcTimeStamp[i] + "," + Device.LampRampUpADC[i * 4] + "," + Device.LampRampUpADC[i * 4 + 1] + "," + Device.LampRampUpADC[i * 4 + 2] + "," + Device.LampRampUpADC[i * 4 + 3]);
+                                else
+                                    sw.WriteLine(Device.LampRampUpADC[i * 4] + "," + Device.LampRampUpADC[i * 4 + 1] + "," + Device.LampRampUpADC[i * 4 + 2] + "," + Device.LampRampUpADC[i * 4 + 3]);
+                            }
                             else
-                                sw.WriteLine(Device.LampAdcTimeStamp[i] + "," + Device.LampRampUpADC[i * 4]);
+                            {
+                                if (Device.DevInfo.TivaRev[0] >= 2 && Device.DevInfo.TivaRev[1] >= 5)
+                                    sw.WriteLine(Device.LampAdcTimeStamp[i] + "," + Device.LampRampUpADC[i * 4]);
+                                else
+                                    sw.WriteLine(Device.LampRampUpADC[i * 4]);
+                            }
                         }
 
                         Device.ReadLampRepeatedScanData();
                         sw.WriteLine("\n***Lamp ADC among repeated times***");
                         if (Device.DevInfo.ModelType == 'R')
-                            sw.WriteLine("Timestamp(ms),ADC0,ADC1,ADC2,ADC3");
+                        {
+                            if (Device.DevInfo.TivaRev[0] >= 2 && Device.DevInfo.TivaRev[1] >= 5)
+                                sw.WriteLine("Timestamp(ms),ADC0,ADC1,ADC2,ADC3");
+                            else
+                                sw.WriteLine("ADC0,ADC1,ADC2,ADC3");
+                        }
                         else
-                            sw.WriteLine("Timestamp(ms),ADC");
+                        {
+                            if (Device.DevInfo.TivaRev[0] >= 2 && Device.DevInfo.TivaRev[1] >= 5)
+                                sw.WriteLine("Timestamp(ms),ADC");
+                            else
+                                sw.WriteLine("ADC");
+                        }
                         for (int i = 0; i < Device.MAX_LAMP_REPEATED_SCAN_ADC_SIZE / 4 && Device.LampRepeatedScanADC[i * 4] != 0; i++)
                         {
                             if (Device.DevInfo.ModelType == 'R')
-                                sw.WriteLine(Device.LampAdcTimeStamp[Device.MAX_LAMP_RAMP_UP_ADC_SIZE/4 + i] + "," + Device.LampRepeatedScanADC[i * 4] + "," + Device.LampRepeatedScanADC[i * 4 + 1] + "," + Device.LampRepeatedScanADC[i * 4 + 2] + "," + Device.LampRepeatedScanADC[i * 4 + 3]);
+                            {
+                                if (Device.DevInfo.TivaRev[0] >= 2 && Device.DevInfo.TivaRev[1] >= 5)
+                                    sw.WriteLine(Device.LampAdcTimeStamp[Device.MAX_LAMP_RAMP_UP_ADC_SIZE / 4 + i] + "," + Device.LampRepeatedScanADC[i * 4] + "," + Device.LampRepeatedScanADC[i * 4 + 1] + "," + Device.LampRepeatedScanADC[i * 4 + 2] + "," + Device.LampRepeatedScanADC[i * 4 + 3]);
+                                else
+                                    sw.WriteLine(Device.LampRepeatedScanADC[i * 4] + "," + Device.LampRepeatedScanADC[i * 4 + 1] + "," + Device.LampRepeatedScanADC[i * 4 + 2] + "," + Device.LampRepeatedScanADC[i * 4 + 3]);
+
+                            }
                             else
-                                sw.WriteLine(Device.LampAdcTimeStamp[Device.MAX_LAMP_RAMP_UP_ADC_SIZE/4 + i] + "," + Device.LampRepeatedScanADC[i * 4]);
+                            {
+                                if (Device.DevInfo.TivaRev[0] >= 2 && Device.DevInfo.TivaRev[1] >= 5)
+                                    sw.WriteLine(Device.LampAdcTimeStamp[Device.MAX_LAMP_RAMP_UP_ADC_SIZE / 4 + i] + "," + Device.LampRepeatedScanADC[i * 4]);
+                                else
+                                    sw.WriteLine(Device.LampRepeatedScanADC[i * 4]);
+                            }
                         }
                     }
                 }
@@ -4016,7 +4056,7 @@ namespace ISC_Win_WinForm_GUI
                     {
                         if (MB_Ver >= 'F' && MB_Ver != 'N')
                         {
-                            int refScanRepeated = 30;
+                            int refScanRepeated = Scan.ReferenceScanConfigData.head.num_repeats;
                             double[] lampADC = new double[4];
                             for (int j = 0; j < 4; j++)
                                 lampADC[j] = 0;
@@ -4167,8 +4207,14 @@ namespace ISC_Win_WinForm_GUI
 
             if (Device.IsConnected())
             {
+                if (RadioButton_LampOff.Checked && RadioButton_RefNew.Checked)
+                {
+                    Message.ShowError("Can not scan reference with lamp off !");
+                    return;
+                }
+
                 Button_ClearAllErrors_Click(this, null); // Clear previous scan error
-                if(Button_Scan.Text == "Continuous")
+                if (Button_Scan.Text == "Continuous")
                 {
                     button_ExitCont.Visible = false;
                     tabScanPage.TabPages[0].Enabled = true;
